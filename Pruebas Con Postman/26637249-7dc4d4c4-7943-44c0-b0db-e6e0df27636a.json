@@ -332,8 +332,29 @@
 						"disableBodyPruning": true
 					},
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Curso de Piano Básico\",\r\n  \"description\": \"Aprende las bases del piano\",\r\n  \"module_id\": 1,\r\n  \"level\": \"beginner\",\r\n  \"duration_minutes\": 120,\r\n  \"instructor_name\": \"Laura Gómez\",\r\n  \"is_active\": true\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/courses",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"courses"
+							]
+						}
 					},
 					"response": []
 				}
