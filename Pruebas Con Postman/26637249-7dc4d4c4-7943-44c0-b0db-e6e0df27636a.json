@@ -491,7 +491,26 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/students/available-courses?module=piano",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"students",
+								"available-courses"
+							],
+							"query": [
+								{
+									"key": "module",
+									"value": "piano"
+								}
+							]
+						}
 					},
 					"response": []
 				},
@@ -523,6 +542,35 @@
 				}
 			],
 			"id": "26637249-914cec2b-a459-4541-a66c-e4961fdf0546"
+		},
+		{
+			"name": "http://localhost:3000/api/students/progress/1",
+			"id": "26637249-f8a46ded-0321-4ab8-a411-6d6369802947",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/students/progress/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"students",
+						"progress",
+						"1"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
