@@ -1,0 +1,87 @@
+.course-enrollment {
+    margin-top: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+}
+
+.enrollment-message {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.enrollment-message.success {
+    background: #e6f9ed;
+    color: #27ae60;
+    border: 1px solid #b7e4c7;
+}
+
+.enrollment-message.error {
+    background: #fee2e2;
+    color: #e74c3c;
+    border: 1px solid #f5b7b1;
+}
+
+.btn {
+    background: #e3e8f0;
+    color: #764ba2;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 1.1rem;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-accent {
+    background: #7b2ff2;
+    color: #fff;
+}
+
+.btn-accent:hover {
+    background: #764ba2;
+}
+
+.enrolled-actions {
+    width: 100%;
+}
+
+.progress-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.progress-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+}
+
+.progress-btn {
+    background: #f3f0fa;
+    color: #764ba2;
+    border: none;
+    border-radius: 6px;
+    padding: 0.3rem 0.9rem;
+    font-weight: 500;
+    font-size: 0.97rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.progress-btn.complete {
+    background: #27ae60;
+    color: #fff;
+}
+
+.progress-btn:disabled {
+    background: #e3e8f0;
+    color: #b2bec3;
+    cursor: not-allowed;
+}

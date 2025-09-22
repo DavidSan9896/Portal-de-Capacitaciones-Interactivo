@@ -1,5 +1,7 @@
 // Componente para inscribirse a cursos
 import React, { useState } from 'react';
+import './CourseEnrollemnt.css';
+
 
 const CourseEnrollment = ({ course, user, onEnrollSuccess }) => {
     const [loading, setLoading] = useState(false);

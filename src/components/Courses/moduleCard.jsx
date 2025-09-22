@@ -1,4 +1,5 @@
 import React from 'react';
+import './ModuleCard.css';
 
 const ModuleCard = ({ module, onClick }) => {
     return (

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
+import './AuthContext.css';
 const AuthContext = createContext();
 
 export const useAuth = () => {

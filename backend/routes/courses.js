@@ -1,16 +1,21 @@
 // Rutas de cursos - endpoints reales con postgresql
 const express = require('express');
-const { query } = require('../config/database');
+const {query} = require('../config/database');
 const router = express.Router();
 
 // Obtener todos los modulos musicales
 router.get('/modules', async (req, res) => {
     try {
         const result = await query(`
-        SELECT  id, name, display_name, description, icon, color,
-        (SELECT COUNT(*) FROM courses WHERE module_id = modules.id AND is_active = true) as course_count
-        FROM modules 
-        ORDER BY id`);
+            SELECT id,
+                   name,
+                   display_name,
+                   description,
+                   icon,
+                   color,
+                   (SELECT COUNT(*) FROM courses WHERE module_id = modules.id AND is_active = true) as course_count
+            FROM modules
+            ORDER BY id`);
         res.json({
             success: true,
             data: result.rows,
@@ -28,7 +33,7 @@ router.get('/modules', async (req, res) => {
 // Obtener todos los cursos o filtrar por modulo
 router.get('/courses', async (req, res) => {
     try {
-        const { module, level, search } = req.query;
+        const {module, level, search} = req.query;
 
         let whereConditions = ['c.is_active = true'];
         let queryParams = [];
@@ -58,19 +63,26 @@ router.get('/courses', async (req, res) => {
         const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
         const result = await query(`
-      SELECT c.id, c.title, c.description,
-        c.level, c.duration_minutes, c.instructor_name,
-        c.video_url, c.badge_image, c.order_in_module,
-        c.created_at,
-        m.name as module_name,
-        m.display_name as module_display_name,
-        m.icon as module_icon,
-        m.color as module_color
-      FROM courses c
-      JOIN modules m ON c.module_id = m.id
-      ${whereClause}
-      ORDER BY m.id, c.order_in_module, c.title
-    `, queryParams);
+            SELECT c.id,
+                   c.title,
+                   c.description,
+                   c.level,
+                   c.duration_minutes,
+                   c.instructor_name,
+                   c.video_url,
+                   c.badge_image,
+                   c.order_in_module,
+                   c.is_active,
+                   c.created_at,
+                   m.name         as module_name,
+                   m.display_name as module_display_name,
+                   m.icon         as module_icon,
+                   m.color        as module_color
+            FROM courses c
+                     JOIN modules m ON c.module_id = m.id
+                ${whereClause}
+            ORDER BY m.id, c.order_in_module, c.title
+        `, queryParams);
 
         // Agrupar por modulos para respuesta mas organizada
         const coursesByModule = {};
@@ -98,13 +110,14 @@ router.get('/courses', async (req, res) => {
                 video_url: course.video_url,
                 badge_image: course.badge_image,
                 order_in_module: course.order_in_module,
+                is_active: course.is_active,
                 created_at: course.created_at
             });
         });
 
         res.json({
             success: true,
-            data: module ? result.rows : coursesByModule, // Si filtran por modulo, devolver array plano
+            data: module ? result.rows : coursesByModule,
             total_courses: result.rows.length,
             filters_applied: {
                 module: module || null,
@@ -135,11 +148,16 @@ router.get('/courses/:id', async (req, res) => {
         }
 
         const result = await query(`
-      SELECT  c.*, m.name as module_name,  m.display_name as module_display_name,
-        m.icon as module_icon, m.color as module_color,  m.description as module_description
-      FROM courses c
-      JOIN modules m ON c.module_id = m.id
-      WHERE c.id = $1 AND c.is_active = true`, [courseId]);
+            SELECT c.*,
+                   m.name         as module_name,
+                   m.display_name as module_display_name,
+                   m.icon         as module_icon,
+                   m.color        as module_color,
+                   m.description  as module_description
+            FROM courses c
+                     JOIN modules m ON c.module_id = m.id
+            WHERE c.id = $1
+              AND c.is_active = true`, [courseId]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({
@@ -187,32 +205,26 @@ router.get('/courses/:id', async (req, res) => {
 router.get('/stats', async (req, res) => {
     try {
         const result = await query(`
-      SELECT 
-        (SELECT COUNT(*) FROM modules) as total_modules,
-        (SELECT COUNT(*) FROM courses WHERE is_active = true) as total_courses,
-        (SELECT COUNT(*) FROM users) as total_users,
-        (SELECT COUNT(*) FROM user_progress WHERE status = 'completed') as total_completed,
-        (SELECT COUNT(*) FROM user_badges) as total_badges,
-        (SELECT 
-          json_agg(
-            json_build_object(
-              'module', display_name, 
-              'count', course_count,
-              'color', color
-            )
-          )
-          FROM (
-            SELECT 
-              m.display_name, 
-              m.color,
-              COUNT(c.id) as course_count 
-            FROM modules m 
-            LEFT JOIN courses c ON m.id = c.module_id AND c.is_active = true
-            GROUP BY m.id, m.display_name, m.color
-            ORDER BY m.id
-          ) as module_stats
-        ) as courses_by_module
-    `);
+            SELECT (SELECT COUNT(*) FROM modules)                                  as total_modules,
+                   (SELECT COUNT(*) FROM courses WHERE is_active = true)           as total_courses,
+                   (SELECT COUNT(*) FROM users)                                    as total_users,
+                   (SELECT COUNT(*) FROM user_progress WHERE status = 'completed') as total_completed,
+                   (SELECT COUNT(*) FROM user_badges)                              as total_badges,
+                   (SELECT json_agg(
+                                   json_build_object(
+                                           'module', display_name,
+                                           'count', course_count,
+                                           'color', color
+                                   )
+                           )
+                    FROM (SELECT m.display_name,
+                                 m.color,
+                                 COUNT(c.id) as course_count
+                          FROM modules m
+                                   LEFT JOIN courses c ON m.id = c.module_id AND c.is_active = true
+                          GROUP BY m.id, m.display_name, m.color
+                          ORDER BY m.id) as module_stats)                          as courses_by_module
+        `);
 
         const stats = result.rows[0];
 

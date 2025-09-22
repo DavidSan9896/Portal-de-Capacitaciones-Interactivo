@@ -1,5 +1,6 @@
 // Header con autenticacion real y recuperacion de contraseña
 import React, { useState } from 'react';
+import './Header.css';
 import { login, register, forgotPassword } from '../../services/api';
 
 const Header = ({ user, onLogin, onLogout }) => {

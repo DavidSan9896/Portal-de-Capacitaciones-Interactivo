@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import './StudentProgress.css';
 import CourseEnrollment from "../Courses/CourseEnrollemnt";
 
 const StudentProgress = ({user, refreshFlag}) => {

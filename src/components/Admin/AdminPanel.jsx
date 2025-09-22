@@ -1,5 +1,6 @@
 // Panel de administracion para gestionar cursos
 import React, {useState, useEffect} from 'react';
+import './AdminPanel.css';
 import {getModules, getCourses} from '../../services/api';
 
 const AdminPanel = ({user}) => {
