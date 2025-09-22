@@ -332,7 +332,7 @@
 			"name": "Estudiantes",
 			"item": [
 				{
-					"name": "New Request",
+					"name": "All Student",
 					"id": "26637249-84ba17ac-054d-4f35-852e-8bbf01911212",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
