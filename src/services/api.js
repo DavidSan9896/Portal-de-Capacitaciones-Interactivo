@@ -1,7 +1,9 @@
-// Servicio de api para conectar con backend
+// Servicio para conectar con el backend de la app
+// Autor: David Santiago Cubillos M.
+
 const API_BASE_URL = 'http://localhost:3000/api';
 
-// Funcion helper para hacer requests
+// Funcion para hacer peticiones a la API
 const apiRequest = async (endpoint, options = {}) => {
     try {
         const url = `${API_BASE_URL}${endpoint}`;
@@ -13,24 +15,27 @@ const apiRequest = async (endpoint, options = {}) => {
             ...options,
         });
 
+        // Si la respuesta no es exitosa, lanza error
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        // Devuelve la data en formato JSON
         const data = await response.json();
         return data;
     } catch (error) {
+        // Muestra el error en consola
         console.error('API Request Error:', error);
         throw error;
     }
 };
 
-// Obtener todos los modulos musicales
+// Trae todos los modulos musicales
 export const getModules = async () => {
     return await apiRequest('/modules');
 };
 
-// Obtener cursos (todos o filtrados por modulo)
+// Trae cursos, se puede filtrar por modulo, nivel o buscar
 export const getCourses = async (module = null, level = null, search = null) => {
     const params = new URLSearchParams();
     if (module) params.append('module', module);
@@ -41,17 +46,17 @@ export const getCourses = async (module = null, level = null, search = null) => 
     return await apiRequest(`/courses${query}`);
 };
 
-// Obtener un curso especifico por id
+// Trae un curso especifico por id
 export const getCourse = async (id) => {
     return await apiRequest(`/courses/${id}`);
 };
 
-// Obtener estadisticas generales
+// Trae estadisticas generales
 export const getStats = async () => {
     return await apiRequest('/stats');
 };
 
-// Auth - login real con base de datos
+// Login de usuario, consulta a la base de datos
 export const login = async (username, password) => {
     return await apiRequest('/auth/login', {
         method: 'POST',
@@ -59,7 +64,7 @@ export const login = async (username, password) => {
     });
 };
 
-// Auth - registro de nuevos usuarios
+// Registro de nuevos usuarios
 export const register = async (userData) => {
     return await apiRequest('/auth/register', {
         method: 'POST',
@@ -67,7 +72,7 @@ export const register = async (userData) => {
     });
 };
 
-// Auth - verificar token existente
+// Verifica si el token es valido
 export const verifyToken = async (token) => {
     return await apiRequest('/auth/verify', {
         headers: {
@@ -76,7 +81,7 @@ export const verifyToken = async (token) => {
     });
 };
 
-// Auth - recuperacion de contraseña
+// Recupera la contrasena si la olvidaste
 export const forgotPassword = async (email) => {
     return await apiRequest('/auth/forgot-password', {
         method: 'POST',
@@ -84,7 +89,7 @@ export const forgotPassword = async (email) => {
     });
 };
 
-// Auth - resetear contraseña con token
+// Cambia la contrasena usando un token (Pendiente por verificar )
 export const resetPassword = async (token, newPassword) => {
     return await apiRequest('/auth/reset-password', {
         method: 'POST',
@@ -92,7 +97,7 @@ export const resetPassword = async (token, newPassword) => {
     });
 };
 
-// Obtener progreso del usuario
+// Trae el progreso del usuario
 export const getUserProgress = async () => {
     return await apiRequest('/user/progress');
 };

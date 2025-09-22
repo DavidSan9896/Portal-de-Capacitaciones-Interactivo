@@ -1,21 +1,26 @@
+// Autor: David Santiago Cubillos Mendez
 // Rutas para funcionalidades del estudiante
+
 const express = require('express');
 const { query, transaction } = require('../config/database');
 const router = express.Router();
 
 // Middleware para verificar autenticacion (simplificado)
 const requireAuth = (req, res, next) => {
+    // Obtiene el header de autorizacion
     const authHeader = req.headers.authorization;
     if (!authHeader) {
+        // Si no hay token, responde no autorizado
         return res.status(401).json({
             success: false,
             message: 'Token de autenticacion requerido'
         });
     }
 
-    // Por ahora usamos el user_id del header (en produccion seria del JWT)
+    // Obtiene el user_id del header (en produccion seria del JWT)
     const userId = req.headers['user-id'];
     if (!userId) {
+        // Si no hay user_id, responde no identificado
         return res.status(401).json({
             success: false,
             message: 'Usuario no identificado'
@@ -26,9 +31,10 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
-// Listar estudiantes para el panel de administración
+// Listar estudiantes para el panel de administracion
 router.get('/', async (req, res) => {
     try {
+        // Consulta para obtener los estudiantes y su informacion
         const result = await query(`
       SELECT
         u.id,
@@ -45,11 +51,13 @@ router.get('/', async (req, res) => {
       ORDER BY u.id ASC
     `, ['admin']);
 
+        // Responde con la lista de estudiantes
         return res.json({
             success: true,
             data: result.rows
         });
     } catch (error) {
+        // Si hay error, responde con error
         console.error('Error listando estudiantes:', error);
         return res.status(500).json({
             success: false,
@@ -57,12 +65,13 @@ router.get('/', async (req, res) => {
         });
     }
 });
+
 // Obtener progreso del estudiante
 router.get('/progress', requireAuth, async (req, res) => {
     try {
         const userId = req.userId;
 
-        // Obtener estadisticas generales (corregido para evitar conteos cruzados)
+        // Consulta para estadisticas generales del usuario
         const statsResult = await query(`
       SELECT 
         (SELECT COUNT(*) FROM user_progress WHERE user_id = $1 AND status = 'started') as courses_started,
@@ -78,7 +87,7 @@ router.get('/progress', requireAuth, async (req, res) => {
             total_enrolled: 0
         };
 
-        // Obtener cursos actuales con progreso
+        // Consulta para obtener los cursos actuales con progreso
         const coursesResult = await query(`
       SELECT 
         c.id,
@@ -99,7 +108,7 @@ router.get('/progress', requireAuth, async (req, res) => {
       ORDER BY up.last_accessed DESC
     `, [userId]);
 
-        // Obtener insignias obtenidas
+        // Consulta para obtener las insignias del usuario
         const badgesResult = await query(`
       SELECT 
         c.id as course_id,
@@ -114,6 +123,7 @@ router.get('/progress', requireAuth, async (req, res) => {
       ORDER BY ub.earned_at DESC
     `, [userId]);
 
+        // Responde con los datos de progreso
         res.json({
             success: true,
             data: {
@@ -133,6 +143,7 @@ router.get('/progress', requireAuth, async (req, res) => {
         });
 
     } catch (error) {
+        // Si hay error, responde con error
         console.error('Error obteniendo progreso:', error);
         res.status(500).json({
             success: false,
@@ -147,6 +158,7 @@ router.post('/enroll/:courseId', requireAuth, async (req, res) => {
         const userId = req.userId;
         const courseId = parseInt(req.params.courseId);
 
+        // Valida que el id del curso sea valido
         if (isNaN(courseId)) {
             return res.status(400).json({
                 success: false,
@@ -154,7 +166,7 @@ router.post('/enroll/:courseId', requireAuth, async (req, res) => {
             });
         }
 
-        // Verificar que el curso existe
+        // Verifica que el curso existe y esta activo
         const courseResult = await query(`
       SELECT id, title FROM courses WHERE id = $1 AND is_active = true
     `, [courseId]);
@@ -168,7 +180,7 @@ router.post('/enroll/:courseId', requireAuth, async (req, res) => {
 
         const course = courseResult.rows[0];
 
-        // Verificar si ya esta inscrito
+        // Verifica si el usuario ya esta inscrito en el curso
         const existingResult = await query(`
       SELECT id FROM user_progress WHERE user_id = $1 AND course_id = $2
     `, [userId, courseId]);
@@ -180,13 +192,14 @@ router.post('/enroll/:courseId', requireAuth, async (req, res) => {
             });
         }
 
-        // Inscribir al estudiante
+        // Inserta la inscripcion en la base de datos
         const enrollResult = await query(`
       INSERT INTO user_progress (user_id, course_id, status, progress_percentage, started_at, last_accessed)
       VALUES ($1, $2, 'started', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING id
     `, [userId, courseId]);
 
+        // Responde con exito
         res.status(201).json({
             success: true,
             data: {
@@ -197,6 +210,7 @@ router.post('/enroll/:courseId', requireAuth, async (req, res) => {
         });
 
     } catch (error) {
+        // Si hay error, responde con error
         console.error('Error en inscripcion:', error);
         res.status(500).json({
             success: false,
@@ -212,6 +226,7 @@ router.put('/progress/:courseId', requireAuth, async (req, res) => {
         const courseId = parseInt(req.params.courseId);
         const { progress_percentage, notes } = req.body;
 
+        // Valida los datos recibidos
         if (isNaN(courseId) || isNaN(progress_percentage)) {
             return res.status(400).json({
                 success: false,
@@ -226,7 +241,7 @@ router.put('/progress/:courseId', requireAuth, async (req, res) => {
             });
         }
 
-        // Verificar que esta inscrito en el curso
+        // Verifica que el usuario este inscrito en el curso
         const enrollmentResult = await query(`
       SELECT id, status FROM user_progress 
       WHERE user_id = $1 AND course_id = $2
@@ -241,7 +256,7 @@ router.put('/progress/:courseId', requireAuth, async (req, res) => {
 
         const enrollment = enrollmentResult.rows[0];
 
-        // Determinar nuevo status
+        // Determina el nuevo estado del progreso
         let newStatus = enrollment.status;
         let completedAt = null;
 
@@ -252,9 +267,9 @@ router.put('/progress/:courseId', requireAuth, async (req, res) => {
             newStatus = 'started';
         }
 
-        // Usar transaccion para actualizar progreso y generar insignia si es necesario
+        // Usa una transaccion para actualizar el progreso y asignar insignia si corresponde
         const result = await transaction(async (client) => {
-            // Actualizar progreso
+            // Actualiza el progreso en la base de datos
             const updateQuery = `
         UPDATE user_progress 
         SET 
@@ -275,9 +290,9 @@ router.put('/progress/:courseId', requireAuth, async (req, res) => {
                 courseId
             ]);
 
-            // Si completo el curso, generar insignia
+            // Si completo el curso, verifica y asigna la insignia
             if (newStatus === 'completed') {
-                // Verificar si ya tiene la insignia
+                // Verifica si ya tiene la insignia
                 const badgeCheck = await client.query(`
           SELECT id FROM user_badges WHERE user_id = $1 AND course_id = $2
         `, [userId, courseId]);
@@ -293,6 +308,7 @@ router.put('/progress/:courseId', requireAuth, async (req, res) => {
             return { newStatus, badgeEarned: newStatus === 'completed' };
         });
 
+        // Responde con el resultado de la actualizacion
         res.json({
             success: true,
             data: {
@@ -306,6 +322,7 @@ router.put('/progress/:courseId', requireAuth, async (req, res) => {
         });
 
     } catch (error) {
+        // Si hay error, responde con error
         console.error('Error actualizando progreso:', error);
         res.status(500).json({
             success: false,
@@ -320,6 +337,7 @@ router.get('/available-courses', requireAuth, async (req, res) => {
         const userId = req.userId;
         const { module } = req.query;
 
+        // Construye el where segun si hay filtro de modulo
         let whereClause = 'WHERE c.is_active = true';
         let queryParams = [userId];
 
@@ -328,6 +346,7 @@ router.get('/available-courses', requireAuth, async (req, res) => {
             queryParams.push(module);
         }
 
+        // Consulta para obtener los cursos disponibles
         const result = await query(`
       SELECT 
         c.id,
@@ -352,6 +371,7 @@ router.get('/available-courses', requireAuth, async (req, res) => {
       ORDER BY m.id, c.order_in_module, c.title
     `, queryParams);
 
+        // Responde con la lista de cursos
         res.json({
             success: true,
             data: result.rows,
@@ -359,6 +379,7 @@ router.get('/available-courses', requireAuth, async (req, res) => {
         });
 
     } catch (error) {
+        // Si hay error, responde con error
         console.error('Error obteniendo cursos disponibles:', error);
         res.status(500).json({
             success: false,
@@ -373,6 +394,7 @@ router.delete('/enroll/:courseId', requireAuth, async (req, res) => {
         const userId = req.userId;
         const courseId = parseInt(req.params.courseId);
 
+        // Valida el id del curso
         if (isNaN(courseId)) {
             return res.status(400).json({
                 success: false,
@@ -380,7 +402,7 @@ router.delete('/enroll/:courseId', requireAuth, async (req, res) => {
             });
         }
 
-        // Verificar inscripcion y estado
+        // Verifica la inscripcion y el estado del curso
         const enrollmentResult = await query(`
       SELECT up.id, up.status, c.title
       FROM user_progress up
@@ -397,6 +419,7 @@ router.delete('/enroll/:courseId', requireAuth, async (req, res) => {
 
         const enrollment = enrollmentResult.rows[0];
 
+        // No permite desinscribirse si el curso esta completado
         if (enrollment.status === 'completed') {
             return res.status(400).json({
                 success: false,
@@ -404,17 +427,19 @@ router.delete('/enroll/:courseId', requireAuth, async (req, res) => {
             });
         }
 
-        // Eliminar inscripcion
+        // Elimina la inscripcion de la base de datos
         await query(`
       DELETE FROM user_progress WHERE user_id = $1 AND course_id = $2
     `, [userId, courseId]);
 
+        // Responde con exito
         res.json({
             success: true,
             message: `Te has desinscrito de "${enrollment.title}"`
         });
 
     } catch (error) {
+        // Si hay error, responde con error
         console.error('Error en desinscripcion:', error);
         res.status(500).json({
             success: false,

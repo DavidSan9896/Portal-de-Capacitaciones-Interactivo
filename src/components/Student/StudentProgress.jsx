@@ -1,8 +1,15 @@
+// StudentProgress.jsx
+// Autor: David C.<3 M.
+// Importa React y hooks para manejar estado y efectos
 import React, {useState, useEffect} from 'react';
+// Importa estilos CSS
 import './StudentProgress.css';
+// Importa el componente para inscribirse a cursos
 import CourseEnrollment from "../Courses/CourseEnrollemnt";
 
+// Componente principal que muestra el progreso del estudiante
 const StudentProgress = ({user, refreshFlag}) => {
+    // Estado para el progreso del estudiante
     const [progress, setProgress] = useState({
         stats: {
             courses_started: 0,
@@ -14,12 +21,18 @@ const StudentProgress = ({user, refreshFlag}) => {
         current_courses: [],
         badges: []
     });
+    // Estado para mostrar si esta cargando
     const [loading, setLoading] = useState(true);
+    // Estado para errores
     const [error, setError] = useState(null);
+    // Estado para cursos disponibles
     const [availableCourses, setAvailableCourses] = useState([]);
+    // Estado para mostrar cursos disponibles
     const [showAvailableCourses, setShowAvailableCourses] = useState(false);
+    // Estado para saber si se esta eliminando un curso
     const [deleting, setDeleting] = useState({});
 
+    // Efecto para cargar datos cuando cambia el usuario o refreshFlag
     useEffect(() => {
         if (user && user.id) {
             loadStudentProgress();
@@ -27,6 +40,7 @@ const StudentProgress = ({user, refreshFlag}) => {
         }
     }, [user, refreshFlag]);
 
+    // Funcion para cargar el progreso del estudiante
     const loadStudentProgress = async () => {
         try {
             setLoading(true);
@@ -50,6 +64,7 @@ const StudentProgress = ({user, refreshFlag}) => {
         }
     };
 
+    // Funcion para cargar cursos disponibles
     const loadAvailableCourses = async () => {
         try {
             const response = await fetch('http://localhost:3000/api/students/available-courses', {
@@ -68,10 +83,12 @@ const StudentProgress = ({user, refreshFlag}) => {
         }
     };
 
+    // Funcion para manejar click en un curso (solo log)
     const handleCourseClick = (courseId) => {
         console.log('Clicked course:', courseId);
     };
 
+    // Funcion para mostrar texto segun el estado del curso
     const getStatusText = (status) => {
         switch (status) {
             case 'completed':
@@ -83,6 +100,7 @@ const StudentProgress = ({user, refreshFlag}) => {
         }
     };
 
+    // Funcion para mostrar color segun el estado del curso
     const getStatusColor = (status) => {
         switch (status) {
             case 'completed':
@@ -94,13 +112,13 @@ const StudentProgress = ({user, refreshFlag}) => {
         }
     };
 
-    // Sumar progreso (UI optimista + sincronización)
+    // Funcion para continuar un curso (aumenta el progreso)
     const handleContinueCourse = async (course) => {
         if (!user || !user.id) return;
         const nuevoProgreso = Math.min((course.progress_percentage || 0) + 5, 100);
         const nuevoStatus = nuevoProgreso >= 100 ? 'completed' : 'started';
 
-        // Actualización optimista de la UI
+        // Actualizacion optimista de la UI
         setProgress(prev => ({
             ...prev,
             current_courses: prev.current_courses.map(c =>
@@ -134,10 +152,10 @@ const StudentProgress = ({user, refreshFlag}) => {
                 throw new Error(data.message || 'Fallo al actualizar el progreso');
             }
 
-            // Recargar el progreso completo para actualizar estadísticas y badges
+            // Recargar el progreso completo para actualizar estadisticas y badges
             await loadStudentProgress();
 
-            // Si se completó el curso, actualizar cursos disponibles
+            // Si se completo el curso, actualizar cursos disponibles
             if (nuevoProgreso >= 100) {
                 await loadAvailableCourses();
             }
@@ -161,11 +179,11 @@ const StudentProgress = ({user, refreshFlag}) => {
         }
     };
 
-    // Eliminar curso del progreso
+    // Funcion para eliminar un curso del progreso
     const handleDeleteCourse = async (course) => {
         if (!user || !user.id) return;
 
-        const confirmDelete = window.confirm(`¿Estás seguro que deseas eliminar el curso "${course.title}" de tu progreso? Esta acción no se puede deshacer.`);
+        const confirmDelete = window.confirm(`¿Estas seguro que deseas eliminar el curso "${course.title}" de tu progreso? Esta accion no se puede deshacer.`);
         if (!confirmDelete) return;
 
         setDeleting(prev => ({...prev, [course.id]: true}));
@@ -211,7 +229,7 @@ const StudentProgress = ({user, refreshFlag}) => {
         }
     };
 
-
+    // Si esta cargando, muestra spinner
     if (loading) {
         return (
             <div className="student-dashboard">
@@ -223,6 +241,7 @@ const StudentProgress = ({user, refreshFlag}) => {
         );
     }
 
+    // Si hay error, muestra mensaje de error
     if (error) {
         return (
             <div className="student-dashboard">
@@ -237,6 +256,7 @@ const StudentProgress = ({user, refreshFlag}) => {
         );
     }
 
+    // Render principal del dashboard del estudiante
     return (
         <div className="student-dashboard">
             <div className="dashboard-header">
@@ -331,6 +351,7 @@ const StudentProgress = ({user, refreshFlag}) => {
                 </div>
             )}
 
+            {/* Cursos disponibles para inscribirse */}
             {showAvailableCourses && (
                 <div style={{marginTop: '2rem'}}>
                     {availableCourses.map(course => (

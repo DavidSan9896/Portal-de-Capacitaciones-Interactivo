@@ -1,24 +1,25 @@
-// Configuracion de base de datos - postgresql
+// Configuracion de la base de datos para PostgreSQL
+
 const { Pool } = require('pg');
 
-// Configuracion de la conexion postgresql
+// Parametros de conexion a la base de datos
 const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-    database: process.env.DB_NAME || 'training_portal',
-    user: process.env.DB_USER || 'PortalDavid',
-    password: process.env.DB_PASSWORD || 'Paswor$23',
-    // Configuraciones adicionales para produccion
+    host: process.env.DB_HOST || 'localhost', // Host de la base de datos
+    port: process.env.DB_PORT || 5432, // Puerto de la base de datos
+    database: process.env.DB_NAME || 'training_portal', // Nombre de la base de datos
+    user: process.env.DB_USER || 'PortalDavid', // Usuario de la base de datos
+    password: process.env.DB_PASSWORD || 'Paswor$23', // Contrasena de la base de datos
+    // Configuracion SSL solo en produccion
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    max: 20, // Maximo de conexiones
-    idleTimeoutMillis: 30000, // Tiempo antes de cerrar conexion inactiva
+    max: 20, // Numero maximo de conexiones en el pool
+    idleTimeoutMillis: 30000, // Tiempo antes de cerrar una conexion inactiva
     connectionTimeoutMillis: 2000, // Tiempo maximo para conectar
 };
 
-// Crear pool de conexiones
+// Crear el pool de conexiones
 const pool = new Pool(dbConfig);
 
-// Funcion para probar la conexion
+// Funcion para probar la conexion a la base de datos
 const testConnection = async () => {
     try {
         const client = await pool.connect();
@@ -38,14 +39,14 @@ const testConnection = async () => {
     }
 };
 
-// Funcion helper para ejecutar  con manejo de errores
+// Funcion para ejecutar consultas SQL con manejo de errores
 const query = async (text, params = []) => {
     const start = Date.now();
     try {
         const result = await pool.query(text, params);
         const duration = Date.now() - start;
 
-        // Log en desarrollo para debugging
+        // Mostrar log solo en desarrollo
         if (process.env.NODE_ENV === 'development') {
             console.log(`Query ejecutada en ${duration}ms:`, text.substring(0, 50));
         }
@@ -59,7 +60,7 @@ const query = async (text, params = []) => {
     }
 };
 
-// Funcion para transacciones
+// Funcion para ejecutar transacciones
 const transaction = async (callback) => {
     const client = await pool.connect();
     try {
@@ -75,7 +76,7 @@ const transaction = async (callback) => {
     }
 };
 
-// Funcion para cerrar todas las conexiones
+// Funcion para cerrar el pool de conexiones
 const closePool = async () => {
     await pool.end();
     console.log('Pool de conexiones postgresql cerrado');
@@ -84,12 +85,13 @@ const closePool = async () => {
 // Funcion para obtener estadisticas del pool
 const getPoolStats = () => {
     return {
-        totalCount: pool.totalCount,
-        idleCount: pool.idleCount,
-        waitingCount: pool.waitingCount
+        totalCount: pool.totalCount, // Total de conexiones
+        idleCount: pool.idleCount, // Conexiones inactivas
+        waitingCount: pool.waitingCount // Conexiones en espera
     };
 };
 
+// Exportar las funciones y el pool
 module.exports = {
     pool,
     query,

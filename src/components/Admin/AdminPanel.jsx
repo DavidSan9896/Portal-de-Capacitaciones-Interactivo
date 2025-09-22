@@ -1,10 +1,14 @@
 // src/components/Admin/AdminPanel.jsx
+// Autor: David Santiago Cubillos M.
+// Panel de Administracion para gestionar modulos, cursos y estudiantes
+
 import React, {useState, useEffect} from 'react';
 import './AdminPanel.css';
 import {getModules, getCourses} from '../../services/api';
 
 // Modal para ver estudiantes de un curso
 const CourseStudentsModal = ({isOpen, onClose, course, students, loading, error}) => {
+    // Si el modal no esta abierto, no muestra nada
     if (!isOpen) return null;
 
     return (
@@ -18,6 +22,7 @@ const CourseStudentsModal = ({isOpen, onClose, course, students, loading, error}
                 <div className="modal-body">
                     {loading && <p>Cargando estudiantes...</p>}
                     {error && <p className="error-text">Error: {error}</p>}
+                    {/* Si hay estudiantes los muestra en tabla, si no muestra mensaje */}
                     {!loading && !error && (
                         students.length > 0 ? (
                             <div className="courses-table">
@@ -28,7 +33,7 @@ const CourseStudentsModal = ({isOpen, onClose, course, students, loading, error}
                                         <th>Nombre</th>
                                         <th>Email</th>
                                         <th>Progreso</th>
-                                        <th>Inscripción</th>
+                                        <th>Inscripcion</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -58,8 +63,9 @@ const CourseStudentsModal = ({isOpen, onClose, course, students, loading, error}
     );
 };
 
-// Componente del Modal para agregar/editar curso
+// Modal para agregar o editar un curso
 const AddCourseModal = ({isOpen, onClose, onSave, modules, initialCourse = null, titleText, submitLabel}) => {
+    // Datos por defecto para el formulario
     const defaultData = {
         title: '',
         description: '',
@@ -70,16 +76,20 @@ const AddCourseModal = ({isOpen, onClose, onSave, modules, initialCourse = null,
         is_active: true
     };
 
+    // Estado para los datos del curso
     const [courseData, setCourseData] = useState(initialCourse ? {...defaultData, ...initialCourse} : defaultData);
 
+    // Cuando se abre el modal, actualiza los datos si es edicion
     useEffect(() => {
         if (isOpen) {
             setCourseData(initialCourse ? {...defaultData, ...initialCourse} : defaultData);
         }
     }, [isOpen, modules, initialCourse]);
 
+    // Si el modal no esta abierto, no muestra nada
     if (!isOpen) return null;
 
+    // Maneja cambios en los inputs del formulario
     const handleChange = (e) => {
         const {name, value, type, checked} = e.target;
         setCourseData(prev => ({
@@ -88,10 +98,11 @@ const AddCourseModal = ({isOpen, onClose, onSave, modules, initialCourse = null,
         }));
     };
 
+    // Cuando se envia el formulario, valida y llama a onSave
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!courseData.title || !courseData.module_id || !courseData.instructor_name) {
-            alert('Por favor, completa los campos obligatorios: Título, Módulo e Instructor.');
+            alert('Por favor, completa los campos obligatorios: Titulo, Modulo e Instructor.');
             return;
         }
         const payload = {
@@ -111,18 +122,18 @@ const AddCourseModal = ({isOpen, onClose, onSave, modules, initialCourse = null,
                 </div>
                 <form onSubmit={handleSubmit} className="modal-form">
                     <div className="form-group">
-                        <label htmlFor="title">Título del Curso</label>
+                        <label htmlFor="title">Titulo del Curso</label>
                         <input type="text" id="title" name="title" value={courseData.title} onChange={handleChange}
                                required/>
                     </div>
                     <div className="form-group">
-                        <label htmlFor="description">Descripción</label>
+                        <label htmlFor="description">Descripcion</label>
                         <textarea id="description" name="description" value={courseData.description}
                                   onChange={handleChange}></textarea>
                     </div>
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="module_id">Módulo</label>
+                            <label htmlFor="module_id">Modulo</label>
                             <select id="module_id" name="module_id" value={courseData.module_id} onChange={handleChange}
                                     required>
                                 {modules.map(m => <option key={m.id} value={m.id}>{m.display_name}</option>)}
@@ -139,7 +150,7 @@ const AddCourseModal = ({isOpen, onClose, onSave, modules, initialCourse = null,
                     </div>
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="duration_minutes">Duración (minutos)</label>
+                            <label htmlFor="duration_minutes">Duracion (minutos)</label>
                             <input type="number" id="duration_minutes" name="duration_minutes" min="1"
                                    value={courseData.duration_minutes} onChange={handleChange}/>
                         </div>
@@ -166,23 +177,26 @@ const AddCourseModal = ({isOpen, onClose, onSave, modules, initialCourse = null,
     );
 };
 
+// Componente principal del panel de administracion
 const AdminPanel = ({user}) => {
+    // Estados para pestañas y datos principales
     const [activeTab, setActiveTab] = useState('overview');
     const [modules, setModules] = useState([]);
     const [allCourses, setAllCourses] = useState([]);
     const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
 
-    // Edición de curso
+    // Estados para edicion de curso
     const [isEditCourseModalOpen, setIsEditCourseModalOpen] = useState(false);
     const [editingCourse, setEditingCourse] = useState(null);
 
-    // Ver estudiantes
+    // Estados para ver estudiantes de un curso
     const [isStudentsModalOpen, setIsStudentsModalOpen] = useState(false);
     const [studentsCourse, setStudentsCourse] = useState(null);
     const [courseStudents, setCourseStudents] = useState([]);
     const [loadingStudents, setLoadingStudents] = useState(false);
     const [studentsError, setStudentsError] = useState(null);
 
+    // Estadisticas generales
     const [stats, setStats] = useState({
         totalModules: 0,
         totalCourses: 0,
@@ -190,10 +204,12 @@ const AdminPanel = ({user}) => {
         recentActivity: []
     });
 
+    // Carga los datos al iniciar
     useEffect(() => {
         loadData();
     }, []);
 
+    // Funcion para cargar modulos y cursos
     const loadData = async () => {
         try {
             const [modulesResponse, coursesResponse] = await Promise.all([
@@ -219,6 +235,7 @@ const AdminPanel = ({user}) => {
         }
     };
 
+    // Guardar un nuevo curso
     const handleSaveNewCourse = async (courseData) => {
         try {
             const response = await fetch('http://localhost:3000/api/courses', {
@@ -243,11 +260,13 @@ const AdminPanel = ({user}) => {
         }
     };
 
+    // Abre el modal para editar un curso
     const handleOpenEditCourse = (course) => {
         setEditingCourse(course);
         setIsEditCourseModalOpen(true);
     };
 
+    // Actualiza un curso existente
     const handleUpdateCourse = async (courseData) => {
         if (!editingCourse) return;
         try {
@@ -274,7 +293,7 @@ const AdminPanel = ({user}) => {
         }
     };
 
-    // Abrir modal de estudiantes y cargar lista
+    // Abre el modal de estudiantes y carga la lista
     const handleOpenCourseStudents = async (course) => {
         setStudentsCourse(course);
         setIsStudentsModalOpen(true);
@@ -300,6 +319,7 @@ const AdminPanel = ({user}) => {
         }
     };
 
+    // Cierra el modal de estudiantes
     const handleCloseCourseStudents = () => {
         setIsStudentsModalOpen(false);
         setStudentsCourse(null);
@@ -307,6 +327,7 @@ const AdminPanel = ({user}) => {
         setStudentsError(null);
     };
 
+    // Pestaña de resumen general
     const OverviewTab = () => (
         <div className="admin-overview">
             <div className="admin-stats">
@@ -331,6 +352,7 @@ const AdminPanel = ({user}) => {
             <div className="modules-overview">
                 <h3>Resumen por Modulos</h3>
                 <div className="modules-summary">
+                    {/* Muestra resumen de cada modulo */}
                     {modules.map(module => (
                         <div key={module.id} className="module-summary-card">
                             <h4>{module.display_name}</h4>
@@ -346,6 +368,7 @@ const AdminPanel = ({user}) => {
         </div>
     );
 
+    // Pestaña de gestion de cursos
     const CoursesTab = ({allCourses}) => {
         const [currentPage, setCurrentPage] = useState(1);
         const [coursesPerPage] = useState(10);
@@ -356,10 +379,12 @@ const AdminPanel = ({user}) => {
             search: ''
         });
 
+        // Aplica filtros cuando cambian
         useEffect(() => {
             applyFilters();
         }, [allCourses, filters]);
 
+        // Filtra los cursos segun los filtros
         const applyFilters = () => {
             let filtered = [...allCourses];
 
@@ -382,14 +407,17 @@ const AdminPanel = ({user}) => {
             setCurrentPage(1);
         };
 
+        // Cambia los filtros
         const handleFilterChange = (filterType, value) => {
             setFilters(prev => ({...prev, [filterType]: value}));
         };
 
+        // Limpia los filtros
         const clearFilters = () => {
             setFilters({module_id: '', level: '', search: ''});
         };
 
+        // Paginacion
         const indexOfLastCourse = currentPage * coursesPerPage;
         const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
         const currentCourses = filteredCourses.slice(indexOfFirstCourse, indexOfLastCourse);
@@ -397,6 +425,7 @@ const AdminPanel = ({user}) => {
 
         const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
+        // Numeros para la paginacion
         const getPaginationNumbers = () => {
             const delta = 2;
             const range = [];
@@ -417,7 +446,9 @@ const AdminPanel = ({user}) => {
             return rangeWithDots.filter((page, index, arr) => arr.indexOf(page) === index);
         };
 
+        // Niveles unicos
         const uniqueLevels = ['beginner', 'intermediate', 'advanced'];
+        // Formatea el texto del nivel
         const formatLevel = (level) => ({
             beginner: 'Principiante',
             intermediate: 'Intermedio',
@@ -427,7 +458,7 @@ const AdminPanel = ({user}) => {
         return (
             <div className="admin-courses">
                 <div className="courses-header">
-                    <h3>Gestión de Cursos</h3>
+                    <h3>Gestion de Cursos</h3>
                     <button className="btn-primary" onClick={() => setIsAddCourseModalOpen(true)}>
                         Agregar Nuevo Curso
                     </button>
@@ -437,7 +468,7 @@ const AdminPanel = ({user}) => {
                     <div className="filter-group">
                         <input
                             type="text"
-                            placeholder="Buscar por título o instructor..."
+                            placeholder="Buscar por titulo o instructor..."
                             value={filters.search}
                             onChange={(e) => handleFilterChange('search', e.target.value)}
                             className="filter-input"
@@ -473,9 +504,9 @@ const AdminPanel = ({user}) => {
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Título</th>
+                            <th>Titulo</th>
                             <th>Nivel</th>
-                            <th>Duración</th>
+                            <th>Duracion</th>
                             <th>Instructor</th>
                             <th>Estado</th>
                             <th>Acciones</th>
@@ -490,7 +521,7 @@ const AdminPanel = ({user}) => {
                                         <div className="course-title">
                                             <strong>{course.title}</strong>
                                             <span className="course-description">
-                                                                    {course.description ? course.description.substring(0, 50) + '...' : 'Sin descripción'}
+                                                                    {course.description ? course.description.substring(0, 50) + '...' : 'Sin descripcion'}
                                                                 </span>
                                         </div>
                                     </td>
@@ -535,6 +566,7 @@ const AdminPanel = ({user}) => {
                     </table>
                 </div>
 
+                {/* Paginacion */}
                 {totalPages > 1 && (
                     <div className="pagination">
                         <button
@@ -575,12 +607,14 @@ const AdminPanel = ({user}) => {
         );
     };
 
+    // Pestaña de estudiantes
     const StudentsTab = () => {
         const [students, setStudents] = useState([]);
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState(null);
         const [statusFilter, setStatusFilter] = useState('all');
 
+        // Carga los estudiantes al iniciar
         useEffect(() => {
             const loadStudents = async () => {
                 setLoading(true);
@@ -606,6 +640,7 @@ const AdminPanel = ({user}) => {
             loadStudents();
         }, []);
 
+        // Filtra los estudiantes por estado
         const filteredStudents = students.filter(s => {
             if (statusFilter === 'active') return s.is_active !== false;
             if (statusFilter === 'inactive') return s.is_active === false;
@@ -631,6 +666,7 @@ const AdminPanel = ({user}) => {
                 {loading && <p>Cargando estudiantes...</p>}
                 {error && <p className="error-text">Error: {error}</p>}
 
+                {/* Muestra los estudiantes en tarjetas */}
                 {!loading && !error && (
             <div className="students-grid">
                         {filteredStudents.length > 0 ? (
@@ -662,6 +698,7 @@ const AdminPanel = ({user}) => {
     );
     };
 
+    // Render principal del panel
     return (
         <div className="admin-panel">
             <div className="admin-header">
@@ -669,6 +706,7 @@ const AdminPanel = ({user}) => {
                 <p>Bienvenido, {user.full_name}</p>
             </div>
 
+            {/* Pestañas */}
             <div className="admin-tabs">
                 <button className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
                         onClick={() => setActiveTab('overview')}>
@@ -684,13 +722,14 @@ const AdminPanel = ({user}) => {
                 </button>
             </div>
 
+            {/* Contenido segun la pestaña */}
             <div className="admin-content">
                 {activeTab === 'overview' && <OverviewTab/>}
                 {activeTab === 'courses' && (<CoursesTab allCourses={allCourses}/>)}
                 {activeTab === 'students' && <StudentsTab/>}
             </div>
 
-            {/* Modal agregar */}
+            {/* Modal agregar curso */}
             <AddCourseModal
                 isOpen={isAddCourseModalOpen}
                 onClose={() => setIsAddCourseModalOpen(false)}
@@ -700,7 +739,7 @@ const AdminPanel = ({user}) => {
                 submitLabel="Guardar Curso"
             />
 
-            {/* Modal editar */}
+            {/* Modal editar curso */}
             <AddCourseModal
                 isOpen={isEditCourseModalOpen}
                 onClose={() => {

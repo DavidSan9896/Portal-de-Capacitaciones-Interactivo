@@ -57,7 +57,7 @@ services:
 
 volumes:
   postgres_data:
-
+# Uso del tipo de red
 networks:
   training_network:
     driver: bridge

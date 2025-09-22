@@ -1,8 +1,10 @@
-// Componente principal - portal de capacitaciones musicales
+// App principal del portal de capacitaciones musicales
+// Autor: David Santigo Cubillos M.
+
 import React, {useState, useEffect} from 'react';
 import './App.css';
 
-// Componentes
+// Componentes principales
 import Header from './components/Layout/Header';
 import ModuleCard from './components/Courses/ModuleCard';
 import LoadingSpinner from './components/Layout/LoadingSpinner';
@@ -10,28 +12,36 @@ import StudentProgress from './components/Student/StudentProgress';
 import AdminPanel from './components/Admin/AdminPanel';
 import CourseEnrollment from './components/Courses/CourseEnrollemnt';
 
-
-// Servicios
+// Servicios para traer datos de la API
 import {getModules, getCourses, verifyToken} from './services/api';
 
 function App() {
+    // Estado para los modulos musicales
     const [modules, setModules] = useState([]);
+    // Estado para el modulo seleccionado
     const [selectedModule, setSelectedModule] = useState(null);
+    // Estado para los cursos del modulo seleccionado
     const [courses, setCourses] = useState([]);
+    // Estado para mostrar spinner de carga
     const [loading, setLoading] = useState(true);
+    // Estado para errores
     const [error, setError] = useState(null);
+    // Estado para el curso seleccionado (no usado)
     const [selectedCourse, setSelectedCourse] = useState(null);
+    // Estado para el usuario logueado
     const [user, setUser] = useState(null);
+    // Estado para refrescar el progreso del estudiante
     const [refreshProgressFlag, setRefreshProgressFlag] = useState(0);
+    // Estado para refrescar la vista
     const [refreshFlag, setRefreshFlag] = useState(false);
 
-
-    // Cargar modulos al iniciar
+    // Cargar modulos y verificar autenticacion al iniciar
     useEffect(() => {
         loadModules();
         checkExistingAuth();
     }, []);
 
+    // Verifica si hay un token guardado y valida el usuario
     const checkExistingAuth = async () => {
         const savedToken = localStorage.getItem('token');
         if (savedToken) {
@@ -50,6 +60,7 @@ function App() {
         }
     };
 
+    // Trae los modulos musicales desde la API
     const loadModules = async () => {
         try {
             setLoading(true);
@@ -67,6 +78,7 @@ function App() {
         }
     };
 
+    // Cuando se selecciona un modulo, trae los cursos de ese modulo
     const handleModuleClick = async (module) => {
         try {
             setSelectedModule(module);
@@ -85,17 +97,19 @@ function App() {
         }
     };
 
-
+    // Volver a la vista de modulos
     const handleBackToModules = () => {
         setSelectedModule(null);
         setCourses([]);
     };
 
+    // Maneja el login del usuario
     const handleLogin = (userData) => {
         setUser(userData);
         localStorage.setItem('portal_user', JSON.stringify(userData));
     };
 
+    // Maneja el logout del usuario
     const handleLogout = () => {
         setUser(null);
         localStorage.removeItem('portal_user');
@@ -103,24 +117,20 @@ function App() {
         setCourses([]);
     };
 
+    // Refresca el progreso del estudiante
     const triggerRefreshProgress = () => setRefreshFlag(flag => !flag);
-    <StudentProgress
-        user={user}
-        refreshFlag={refreshFlag}
-        triggerRefreshProgress={triggerRefreshProgress}
-    />
+
+    // (No implementado) Maneja el click en un curso
     const handleCourseClick = (course) => {
     };
 
-
-
-
+    // Maneja la inscripcion a un curso
     const handleEnrollInCourse = async (course) => {
         if (!user) {
-            alert('Debes iniciar sesión para acceder');
+            alert('Debes iniciar sesion para acceder');
             return;
         }
-        // Llama a la API de inscripción
+        // Llama a la API de inscripcion
         try {
             const response = await fetch(`http://localhost:3000/api/students/enroll/${course.id}`, {
                 method: 'POST',
@@ -133,14 +143,14 @@ function App() {
             const data = await response.json();
             if (data.success) {
                 triggerRefreshProgress();
-                // Recarga los cursos del módulo actual
+                // Recarga los cursos del modulo actual
                 if (selectedModule) {
                     const coursesResponse = await getCourses(selectedModule.name);
                     if (coursesResponse.success) {
                         setCourses(coursesResponse.data);
                     }
                 }
-                alert('¡Curso agregado a tu progreso!');
+                alert('Curso agregado a tu progreso!');
             } else {
                 alert(data.message);
             }
@@ -149,7 +159,7 @@ function App() {
         }
     };
 
-
+    // Si esta cargando y no hay modulos, muestra spinner
     if (loading && modules.length === 0) {
         return (
             <div className="app">
@@ -163,6 +173,7 @@ function App() {
         );
     }
 
+    // Si hay error, muestra mensaje de error
     if (error) {
         return (
             <div className="app">
@@ -184,6 +195,7 @@ function App() {
         );
     }
 
+    // Render principal segun el tipo de usuario
     return (
         <div className="app">
             <Header
@@ -197,7 +209,7 @@ function App() {
                     // Vista de administrador
                     <AdminPanel user={user}/>
                 ) : user && user.role === 'student' ? (
-                    // Vista de estudiante - puede elegir ver progreso o explorar cursos
+                    // Vista de estudiante: progreso y cursos
                     <div>
                         <StudentProgress user={user} refreshFlag={refreshProgressFlag}/>
                         <div style={{marginTop: '3rem', borderTop: '2px solid #ecf0f1', paddingTop: '3rem'}}>
@@ -261,7 +273,7 @@ function App() {
                                                         user={user}
                                                         onEnrollSuccess={async () => {
                                                             triggerRefreshProgress();
-                                                            // Recarga los cursos del módulo actual
+                                                            // Recarga los cursos del modulo actual
                                                             if (selectedModule) {
                                                                 const coursesResponse = await getCourses(selectedModule.name);
                                                                 if (coursesResponse.success) {
@@ -279,7 +291,7 @@ function App() {
                         </div>
                     </div>
                 ) : (
-                    // Vista publica - sin usuario logueado
+                    // Vista publica: sin usuario logueado
                     !selectedModule ? (
                         <div className="modules-section">
                             <div className="hero-section">
@@ -347,12 +359,12 @@ function App() {
                                                 className="course-start-button"
                                                 onClick={() => {
                                                     if (!user) {
-                                                        alert('Debes iniciar sesión para acceder');
+                                                        alert('Debes iniciar sesion para acceder');
                                                         return;
                                                     }
                                                 }}
                                             >
-                                                {user ? 'Comenzar curso' : 'Inicia sesión para acceder'}
+                                                {user ? 'Comenzar curso' : 'Inicia sesion para acceder'}
                                             </button>
                                         </div>
                                     ))}

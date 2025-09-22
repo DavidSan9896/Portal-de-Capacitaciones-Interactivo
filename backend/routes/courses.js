@@ -1,4 +1,5 @@
-// Rutas de cursos - endpoints reales con postgresql
+// Rutas para cursos y modulos musicales usando Express y PostgreSQL
+
 const express = require('express');
 const {query} = require('../config/database');
 const router = express.Router();
@@ -6,6 +7,7 @@ const router = express.Router();
 // Obtener todos los modulos musicales
 router.get('/modules', async (req, res) => {
     try {
+        // Consulta para traer modulos y cantidad de cursos activos por modulo
         const result = await query(`
             SELECT id,
                    name,
@@ -30,30 +32,31 @@ router.get('/modules', async (req, res) => {
     }
 });
 
-// Obtener todos los cursos o filtrar por modulo
+// Obtener todos los cursos o filtrar por modulo, nivel o busqueda
 router.get('/courses', async (req, res) => {
     try {
         const {module, level, search} = req.query;
 
+        // Condiciones para el WHERE de la consulta
         let whereConditions = ['c.is_active = true'];
         let queryParams = [];
         let paramCount = 0;
 
-        // Filtrar por modulo
+        // Filtro por modulo
         if (module) {
             paramCount++;
             whereConditions.push(`m.name = $${paramCount}`);
             queryParams.push(module);
         }
 
-        // Filtrar por nivel
+        // Filtro por nivel
         if (level) {
             paramCount++;
             whereConditions.push(`c.level = $${paramCount}`);
             queryParams.push(level);
         }
 
-        // Busqueda por titulo o descripcion
+        // Filtro por busqueda en titulo o descripcion
         if (search) {
             paramCount++;
             whereConditions.push(`(c.title ILIKE $${paramCount} OR c.description ILIKE $${paramCount})`);
@@ -62,6 +65,7 @@ router.get('/courses', async (req, res) => {
 
         const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
+        // Consulta para traer cursos y datos del modulo
         const result = await query(`
             SELECT c.id,
                    c.title,
@@ -84,7 +88,7 @@ router.get('/courses', async (req, res) => {
             ORDER BY m.id, c.order_in_module, c.title
         `, queryParams);
 
-        // Agrupar por modulos para respuesta mas organizada
+        // Agrupar cursos por modulo si no se filtro por modulo
         const coursesByModule = {};
         result.rows.forEach(course => {
             const moduleKey = course.module_name;
@@ -140,6 +144,7 @@ router.get('/courses/:id', async (req, res) => {
     try {
         const courseId = parseInt(req.params.id);
 
+        // Validar que el id sea un numero
         if (isNaN(courseId)) {
             return res.status(400).json({
                 success: false,
@@ -147,6 +152,7 @@ router.get('/courses/:id', async (req, res) => {
             });
         }
 
+        // Consulta para traer el curso y datos del modulo
         const result = await query(`
             SELECT c.*,
                    m.name         as module_name,
@@ -159,6 +165,7 @@ router.get('/courses/:id', async (req, res) => {
             WHERE c.id = $1
               AND c.is_active = true`, [courseId]);
 
+        // Si no se encontro el curso
         if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -204,6 +211,7 @@ router.get('/courses/:id', async (req, res) => {
 // Obtener estadisticas generales
 router.get('/stats', async (req, res) => {
     try {
+        // Consulta para traer estadisticas generales y cursos por modulo
         const result = await query(`
             SELECT (SELECT COUNT(*) FROM modules)                                  as total_modules,
                    (SELECT COUNT(*) FROM courses WHERE is_active = true)           as total_courses,
@@ -251,15 +259,16 @@ router.get('/stats', async (req, res) => {
     }
 });
 
-// Editar un curso por id (actualización parcial)
+// Editar un curso por id (actualizacion parcial)
 router.put('/courses/:id', async (req, res) => {
     try {
         const courseId = parseInt(req.params.id, 10);
         if (Number.isNaN(courseId)) {
-            return res.status(400).json({success: false, message: 'Id de curso inválido'});
+            return res.status(400).json({success: false, message: 'Id de curso invalido'});
         }
 
         const body = req.body || {};
+        // Campos permitidos para actualizar
         const allowedFields = [
             'title',
             'description',
@@ -277,14 +286,17 @@ router.put('/courses/:id', async (req, res) => {
         const params = [];
         let idx = 1;
 
+        // Armar SET dinamico segun los campos enviados
         for (const field of allowedFields) {
             if (body[field] !== undefined) {
                 let value = body[field];
 
+                // Convertir a numero si corresponde
                 if (['module_id', 'duration_minutes', 'order_in_module'].includes(field)) {
                     const parsed = parseInt(value, 10);
                     value = Number.isNaN(parsed) ? null : parsed;
                 }
+                // Convertir a booleano si corresponde
                 if (field === 'is_active') {
                     value = Boolean(value);
                 }
@@ -294,10 +306,12 @@ router.put('/courses/:id', async (req, res) => {
             }
         }
 
+        // Si no hay campos para actualizar
         if (setClauses.length === 0) {
             return res.status(400).json({success: false, message: 'No hay campos para actualizar'});
         }
 
+        // Consulta de actualizacion
         const sql = `
             UPDATE courses
             SET ${setClauses.join(', ')},
@@ -330,7 +344,7 @@ router.post('/courses', async (req, res) => {
         const body = req.body || {};
         const errors = {};
 
-        // Coerciones básicas
+        // Obtener y validar datos del body
         const title = (body.title ?? '').toString().trim();
         const description = body.description != null ? body.description.toString().trim() : null;
         const level = (body.level ?? 'beginner').toString().trim();
@@ -341,47 +355,48 @@ router.post('/courses', async (req, res) => {
             ? body.is_active.toLowerCase() !== 'false'
             : Boolean(body.is_active);
 
-        // Validaciones del formulario
-        if (!title) errors.title = 'El título es obligatorio';
-        else if (title.length < 3) errors.title = 'Mínimo 3 caracteres';
+        // Validaciones basicas
+        if (!title) errors.title = 'El titulo es obligatorio';
+        else if (title.length < 3) errors.title = 'Minimo 3 caracteres';
 
         if (!Number.isInteger(module_id) || module_id <= 0) {
-            errors.module_id = 'module_id inválido';
+            errors.module_id = 'module_id invalido';
         }
 
         const allowedLevels = new Set(['beginner', 'intermediate', 'advanced']);
         if (!allowedLevels.has(level)) {
-            errors.level = "Nivel inválido. Use 'beginner' | 'intermediate' | 'advanced'";
+            errors.level = "Nivel invalido. Use 'beginner' | 'intermediate' | 'advanced'";
         }
 
         if (!Number.isInteger(duration_minutes) || duration_minutes < 1) {
-            errors.duration_minutes = 'Duración debe ser un entero ≥ 1';
+            errors.duration_minutes = 'Duracion debe ser un entero >= 1';
         }
 
         if (!instructor_name) errors.instructor_name = 'El instructor es obligatorio';
 
+        // Si hay errores de validacion
         if (Object.keys(errors).length > 0) {
-            return res.status(422).json({success: false, message: 'Datos inválidos', errors});
+            return res.status(422).json({success: false, message: 'Datos invalidos', errors});
         }
 
-        // Verificar que el módulo exista
+        // Verificar que el modulo exista
         const {rowCount: modExists} = await query('SELECT 1 FROM modules WHERE id = $1', [module_id]);
         if (modExists === 0) {
             return res.status(422).json({
                 success: false,
-                message: 'Datos inválidos',
-                errors: {module_id: 'El módulo no existe'}
+                message: 'Datos invalidos',
+                errors: {module_id: 'El modulo no existe'}
             });
         }
 
-        // Siguiente orden dentro del módulo
+        // Calcular siguiente orden en el modulo
         const {rows: orderRows} = await query(
             'SELECT COALESCE(MAX(order_in_module), 0) + 1 AS next_order FROM courses WHERE module_id = $1',
             [module_id]
         );
         const nextOrder = orderRows[0]?.next_order || 1;
 
-        // Insert
+        // Insertar el nuevo curso
         const insertSql = `
             INSERT INTO courses
             (title, description, module_id, level, duration_minutes, instructor_name, video_url, badge_image,
@@ -396,8 +411,8 @@ router.post('/courses', async (req, res) => {
             level,
             duration_minutes,
             instructor_name,
-            null,           // video_url (no lo envía el formulario)
-            null,           // badge_image (no lo envía el formulario)
+            null,           // video_url (no lo envia el formulario)
+            null,           // badge_image (no lo envia el formulario)
             nextOrder,
             is_active
         ]);

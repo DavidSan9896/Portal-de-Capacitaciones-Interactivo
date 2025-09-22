@@ -1,37 +1,49 @@
+// Componente de login para acceder a la aplicacion
+// Autor: David Santigo Cubillos M.
+
 import React, { useState } from 'react';
 import './Login.css';
 import { login } from '../../services/api';
 
 const Login = ({ onLoginSuccess }) => {
+    // Estado para los datos del formulario
     const [formData, setFormData] = useState({
         username: '',
         password: ''
     });
+    // Estado para mostrar si esta cargando
     const [loading, setLoading] = useState(false);
+    // Estado para mostrar errores
     const [error, setError] = useState('');
 
+    // Funcion que se ejecuta al enviar el formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
         try {
+            // Llama a la funcion login con los datos del usuario
             const response = await login(formData.username, formData.password);
             if (response.success) {
+                // Guarda datos en localStorage si el login es exitoso
                 localStorage.setItem('user', JSON.stringify(response.user));
                 localStorage.setItem('userId', response.user.id);
                 localStorage.setItem('token', response.token);
                 onLoginSuccess(response.user);
             } else {
+                // Muestra mensaje de error si el login falla
                 setError(response.message);
             }
         } catch (err) {
+            // Muestra mensaje si hay error de conexion
             setError('Error de conexion. Intente nuevamente.');
         } finally {
             setLoading(false);
         }
     };
 
+    // Funcion para actualizar los datos del formulario
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -69,7 +81,7 @@ const Login = ({ onLoginSuccess }) => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">Contraseña</label>
+                        <label htmlFor="password">Contrasena</label>
                         <input
                             type="password"
                             id="password"
@@ -77,7 +89,7 @@ const Login = ({ onLoginSuccess }) => {
                             value={formData.password}
                             onChange={handleChange}
                             required
-                            placeholder="Ingresa tu contraseña"
+                            placeholder="Ingresa tu contrasena"
                             disabled={loading}
                         />
                     </div>

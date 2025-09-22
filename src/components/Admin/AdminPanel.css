@@ -1,3 +1,4 @@
+/* Contenedor principal del panel de administración */
 .admin-panel {
     background: #f8fafc;
     padding: 2.5rem 0 3rem 0;
@@ -8,6 +9,7 @@
     margin: 0 auto 2rem auto;
 }
 
+/* Encabezado del panel */
 .admin-header {
     text-align: center;
     margin-bottom: 2.5rem;
@@ -23,6 +25,7 @@
     font-size: 1.1rem;
 }
 
+/* Pestañas de navegación del panel */
 .admin-tabs {
     display: flex;
     justify-content: center;
@@ -47,14 +50,17 @@
     color: #fff;
 }
 
+/* Contenido principal del panel */
 .admin-content {
     padding: 2rem 1.5rem 0 1.5rem;
 }
 
+/* Sección de resumen general */
 .admin-overview {
     margin-bottom: 2.5rem;
 }
 
+/* Tarjetas de estadísticas */
 .admin-stats {
     display: flex;
     gap: 2rem;
@@ -82,6 +88,7 @@
     font-size: 1rem;
 }
 
+/* Resumen de módulos */
 .modules-overview h3 {
     color: #34495e;
     margin-bottom: 1rem;
@@ -113,12 +120,14 @@
     margin-bottom: 0.7rem;
 }
 
+/* Acciones de cada módulo */
 .module-actions {
     display: flex;
     gap: 0.7rem;
     justify-content: center;
 }
 
+/* Botones genéricos */
 .btn-small {
     background: #3498db;
     color: #fff;
@@ -152,6 +161,7 @@
     color: #fff;
 }
 
+/* Estados deshabilitados de botones */
 .btn-small:disabled,
 .btn-primary:disabled,
 .btn-secondary:disabled,
@@ -161,10 +171,12 @@
     cursor: not-allowed;
 }
 
+/* Sección de cursos */
 .admin-courses {
     margin-bottom: 2.5rem;
 }
 
+/* Encabezado y filtros de cursos */
 .courses-header {
     display: flex;
     align-items: center;
@@ -200,12 +212,14 @@
     color: #34495e;
 }
 
+/* Texto informativo de cursos */
 .courses-info {
     color: #888;
     font-size: 0.97rem;
     margin-bottom: 0.7rem;
 }
 
+/* Tabla de cursos */
 .courses-table {
     overflow-x: auto;
     background: #fff;
@@ -237,6 +251,7 @@
     background: #f8fafc;
 }
 
+/* Tipografías y descripciones de cursos */
 .course-title {
     font-weight: 600;
     color: #2c3e50;
@@ -249,6 +264,7 @@
     display: block;
 }
 
+/* Insignias de nivel del curso */
 .level-badge {
     display: inline-block;
     padding: 0.2rem 0.8rem;
@@ -272,6 +288,7 @@
     color: #e74c3c;
 }
 
+/* Insignias de estado del curso */
 .status-badge {
     display: inline-block;
     padding: 0.2rem 0.8rem;
@@ -291,11 +308,13 @@
     color: #e74c3c;
 }
 
+/* Acciones dentro de la tabla */
 .table-actions {
     display: flex;
     gap: 0.5rem;
 }
 
+/* Mensaje sin resultados */
 .no-results {
     text-align: center;
     color: #888;
@@ -303,6 +322,7 @@
     font-size: 1.1rem;
 }
 
+/* Paginación de la tabla */
 .pagination {
     display: flex;
     align-items: center;
@@ -354,6 +374,7 @@
     padding: 0.3rem 0.8rem;
 }
 
+/* Sección de estudiantes */
 .admin-students {
     margin-bottom: 2.5rem;
 }
@@ -370,6 +391,7 @@
     margin: 0;
 }
 
+/* Filtros de estudiantes */
 .students-filters select {
     padding: 0.4rem 0.9rem;
     border-radius: 6px;
@@ -379,6 +401,7 @@
     color: #34495e;
 }
 
+/* Grid de tarjetas de estudiantes */
 .students-grid {
     display: flex;
     flex-wrap: wrap;
@@ -386,6 +409,7 @@
     justify-content: center;
 }
 
+/* Tarjeta de estudiante */
 .student-card {
     background: #fff;
     border-radius: 10px;
@@ -409,6 +433,7 @@
     margin-bottom: 0.7rem;
 }
 
+/* Métricas de estudiante */
 .student-stats {
     display: flex;
     gap: 1.2rem;
@@ -429,7 +454,8 @@
     color: #888;
     font-size: 0.95rem;
 }
-/* Estilos para el Modal de Agregar Curso */
+
+/* Modal para agregar curso */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -453,6 +479,7 @@
     animation: slide-down 0.3s ease-out;
 }
 
+/* Animación de aparición del modal */
 @keyframes slide-down {
     from {
         transform: translateY(-30px);
@@ -464,6 +491,7 @@
     }
 }
 
+/* Encabezado del modal */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -479,6 +507,7 @@
     color: #1f2937;
 }
 
+/* Botón de cierre del modal */
 .modal-close-btn {
     background: none;
     border: none;
@@ -488,6 +517,7 @@
     line-height: 1;
 }
 
+/* Formulario del modal */
 .modal-form .form-group {
     margin-bottom: 1.25rem;
 }
@@ -511,6 +541,7 @@
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* Estados de foco en inputs del modal */
 .modal-form input:focus,
 .modal-form textarea:focus,
 .modal-form select:focus {
@@ -519,11 +550,13 @@
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
 }
 
+/* Textarea del modal */
 .modal-form textarea {
     min-height: 100px;
     resize: vertical;
 }
 
+/* Filas y controles del formulario del modal */
 .modal-form .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -545,6 +578,7 @@
     width: auto;
 }
 
+/* Pie del modal con acciones */
 .modal-footer {
     display: flex;
     justify-content: flex-end;
