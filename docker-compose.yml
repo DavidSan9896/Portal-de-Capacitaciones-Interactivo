@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: training_portal_db
+    environment:
+      POSTGRES_DB: training_portal
+      POSTGRES_USER: PortalDavid
+      POSTGRES_PASSWORD: Paswor$23
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - training_network
+
+  # Backend Node.js
+  backend:
+    build: ./backend
+    container_name: training_portal_backend
+    environment:
+      NODE_ENV: development
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: training_portal
+      DB_USER: PortalDavid
+      DB_PASSWORD: Paswor$23
+      JWT_SECRET: cifrado_super_secreto_123
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - /app/node_modules
+    networks:
+      - training_network
+
+  # Frontend React
+  frontend:
+    build: .
+    container_name: training_portal_frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:3000/api
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - training_network
+
+volumes:
+  postgres_data:
+
+networks:
+  training_network:
+    driver: bridge

@@ -1,23 +1,49 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # testing
 /coverage
 
-# production
+# Production builds
+/dist
 /build
 
-# misc
-.DS_Store
+
+# Environment variables
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker volumes
+postgres_data/
+
+# WebStorm / IntelliJ
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Secrets
+*.key
+*.pem
+secrets/
+credentials/
+
