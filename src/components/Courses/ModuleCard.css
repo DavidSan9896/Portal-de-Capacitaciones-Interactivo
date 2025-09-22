@@ -1,0 +1,62 @@
+.module-card {
+    background: rgba(224, 222, 222, 0.89);
+    border-radius: 12px;
+    box-shadow: 0 1px 8px #e3e8f0;
+    padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+    min-width: 260px;
+    max-width: 340px;
+    flex: 1 1 260px;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+    border-top: 6px solid var(--module-color, #7b2ff2);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.module-card:hover {
+    box-shadow: 0 4px 18px rgba(188, 192, 197, 0.96);
+    transform: translateY(-4px) scale(1.03);
+}
+
+.module-title {
+    color: #764ba2;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.module-description {
+    color: #6c757d;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    min-height: 48px;
+}
+
+.module-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+}
+
+.btn {
+    background: #e3e8f0;
+    color: #694a8a;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 1.1rem;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-accent {
+    background: #5e19c9;
+    color: #fff;
+}
+
+.btn-accent:hover {
+    background: #70457e;
+}

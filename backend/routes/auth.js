@@ -1,14 +1,17 @@
-// Rutas de autenticacion real con postgresql
+// Rutas de autenticacion usando PostgreSQL
+
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/database');
 const router = express.Router();
 
-// Middleware para verificar token jwt
+// Middleware para verificar el token JWT
 const verifyToken = async (req, res, next) => {
+    // Obtiene el token del header Authorization
     const token = req.headers.authorization?.replace('Bearer ', '');
 
+    // Si no hay token, responde con error
     if (!token) {
         return res.status(401).json({
             success: false,
@@ -17,10 +20,12 @@ const verifyToken = async (req, res, next) => {
     }
 
     try {
+        // Verifica el token
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'cifrado_super_secreto_123');
         req.user = decoded;
         next();
     } catch (error) {
+        // Si el token no es valido, responde con error
         return res.status(401).json({
             success: false,
             message: 'Token invalido'
@@ -28,25 +33,27 @@ const verifyToken = async (req, res, next) => {
     }
 };
 
-// Login con base de datos postgresql
+// Ruta para login de usuario
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
+        // Verifica que se envien usuario y contrasena
         if (!username || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Usuario y contraseña son requeridos'
+                message: 'Usuario y contrasena son requeridos'
             });
         }
 
-        // Buscar usuario en base de datos por username o email
+        // Busca el usuario por username o email
         const result = await query(`
             SELECT id, username, email, password_hash, full_name, avatar_url, created_at
             FROM users
             WHERE username = $1 OR email = $1
         `, [username.toLowerCase()]);
 
+        // Si no existe el usuario, responde con error
         if (result.rows.length === 0) {
             return res.status(401).json({
                 success: false,
@@ -56,19 +63,19 @@ router.post('/login', async (req, res) => {
 
         const user = result.rows[0];
 
-        // Verificar contraseña con bcrypt
+        // Compara la contrasena con el hash
         const isValidPassword = await bcrypt.compare(password, user.password_hash);
         if (!isValidPassword) {
             return res.status(401).json({
                 success: false,
-                message: 'Contraseña incorrecta'
+                message: 'Contrasena incorrecta'
             });
         }
 
-        // Determinar rol (admin si username es 'admin', sino student)
+        // Asigna el rol segun el username
         const role = user.username === 'admin' ? 'admin' : 'student';
 
-        // Generar token jwt
+        // Genera el token JWT
         const token = jwt.sign(
             {
                 id: user.id,
@@ -79,7 +86,7 @@ router.post('/login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        // Respuesta exitosa sin incluir password_hash
+        // Responde con los datos del usuario y el token
         res.json({
             success: true,
             message: 'Login exitoso',
@@ -96,6 +103,7 @@ router.post('/login', async (req, res) => {
         });
 
     } catch (error) {
+        // Error interno del servidor
         console.error('Error en login:', error);
         res.status(500).json({
             success: false,
@@ -104,27 +112,28 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Registro de nuevos usuarios
+// Ruta para registrar nuevos usuarios
 router.post('/register', async (req, res) => {
     try {
         const { username, email, password, full_name } = req.body;
 
+        // Verifica que se envien los datos requeridos
         if (!username || !email || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Usuario, email y contraseña son requeridos'
+                message: 'Usuario, email y contrasena son requeridos'
             });
         }
 
-        // Verificar longitud minima de contraseña
+        // Verifica que la contrasena tenga al menos 6 caracteres
         if (password.length < 6) {
             return res.status(400).json({
                 success: false,
-                message: 'La contraseña debe tener al menos 6 caracteres'
+                message: 'La contrasena debe tener al menos 6 caracteres'
             });
         }
 
-        // Verificar si usuario o email ya existe
+        // Verifica si el usuario o email ya existe
         const existingUser = await query(`
       SELECT id FROM users 
       WHERE username = $1 OR email = $2
@@ -137,11 +146,11 @@ router.post('/register', async (req, res) => {
             });
         }
 
-        // Encriptar contraseña
+        // Encripta la contrasena
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // Insertar nuevo usuario
+        // Inserta el nuevo usuario en la base de datos
         const result = await query(`
             INSERT INTO users (username, email, password_hash, full_name, created_at)
             VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
@@ -149,9 +158,9 @@ router.post('/register', async (req, res) => {
         `, [username.toLowerCase(), email.toLowerCase(), hashedPassword, full_name || username]);
 
         const newUser = result.rows[0];
-        const role = 'student'; // Nuevos usuarios siempre son estudiantes
+        const role = 'student'; // Todos los nuevos usuarios son estudiantes
 
-        // Generar token
+        // Genera el token JWT
         const token = jwt.sign(
             {
                 id: newUser.id,
@@ -162,6 +171,7 @@ router.post('/register', async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        // Responde con los datos del usuario y el token
         res.status(201).json({
             success: true,
             message: 'Usuario registrado exitosamente',
@@ -178,6 +188,7 @@ router.post('/register', async (req, res) => {
         });
 
     } catch (error) {
+        // Error interno del servidor
         console.error('Error en registro:', error);
         res.status(500).json({
             success: false,
@@ -186,15 +197,17 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Verificar token (para mantener sesion)
+// Ruta para verificar el token y mantener sesion
 router.get('/verify', verifyToken, async (req, res) => {
     try {
+        // Busca el usuario por id
         const result = await query(`
             SELECT id, username, email, full_name, avatar_url, created_at
             FROM users
             WHERE id = $1
         `, [req.user.id]);
 
+        // Si no existe el usuario, responde con error
         if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -204,6 +217,7 @@ router.get('/verify', verifyToken, async (req, res) => {
 
         const user = result.rows[0];
 
+        // Responde con los datos del usuario
         res.json({
             success: true,
             user: {
@@ -218,6 +232,7 @@ router.get('/verify', verifyToken, async (req, res) => {
         });
 
     } catch (error) {
+        // Error interno del servidor
         console.error('Error verificando token:', error);
         res.status(500).json({
             success: false,
@@ -226,11 +241,12 @@ router.get('/verify', verifyToken, async (req, res) => {
     }
 });
 
-// Solicitar recuperacion de contraseña
+// Ruta para solicitar recuperacion de contrasena
 router.post('/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
 
+        // Verifica que se envie el email
         if (!email) {
             return res.status(400).json({
                 success: false,
@@ -238,13 +254,13 @@ router.post('/forgot-password', async (req, res) => {
             });
         }
 
-        // Verificar si el email existe en la base de datos
+        // Busca el usuario por email
         const result = await query(`
             SELECT id, username, full_name FROM users
             WHERE email = $1
         `, [email.toLowerCase()]);
 
-        // Por seguridad, no revelar si el email existe o no
+        // No revela si el email existe o no por seguridad
         if (result.rows.length === 0) {
             return res.json({
                 success: true,
@@ -254,24 +270,24 @@ router.post('/forgot-password', async (req, res) => {
 
         const user = result.rows[0];
 
-        // Generar token de recuperacion (valido por 1 hora)
+        // Genera un token de recuperacion valido por 1 hora
         const resetToken = jwt.sign(
             { userId: user.id, purpose: 'password_reset' },
             process.env.JWT_SECRET || 'cifrado_super_secreto_123',
             { expiresIn: '1h' }
         );
 
-        // Simular envio de email (en produccion se enviaria real)
+        // Simula el envio de email (solo para desarrollo)
         console.log(`
     ===================================
     EMAIL DE RECUPERACION (SIMULADO)
     ===================================
     Para: ${email}
-    Asunto: Recuperacion de contraseña - Academia Musical
+    Asunto: Recuperacion de contrasena - Academia Musical
     
     Hola ${user.full_name || user.username},
     
-    Has solicitado recuperar tu contraseña.
+    Has solicitado recuperar tu contrasena.
     
     Token de recuperacion: ${resetToken}
     
@@ -280,15 +296,16 @@ router.post('/forgot-password', async (req, res) => {
     Usa el endpoint POST /api/auth/reset-password con:
     {
       "token": "${resetToken}",
-      "newPassword": "tu_nueva_contraseña"
+      "newPassword": "tu_nueva_contrasena"
     }
     ===================================
     `);
 
+        // Responde que el email fue enviado (o simulado)
         res.json({
             success: true,
             message: 'Si el email existe, se ha enviado un enlace de recuperacion',
-            // En desarrollo, incluir el token para pruebas
+            // Incluye el token solo en desarrollo
             ...(process.env.NODE_ENV === 'development' && {
                 resetToken: resetToken,
                 note: 'Token incluido solo en desarrollo'
@@ -296,6 +313,7 @@ router.post('/forgot-password', async (req, res) => {
         });
 
     } catch (error) {
+        // Error interno del servidor
         console.error('Error en forgot-password:', error);
         res.status(500).json({
             success: false,
@@ -304,27 +322,28 @@ router.post('/forgot-password', async (req, res) => {
     }
 });
 
-// Resetear contraseña con token
+// Ruta para resetear la contrasena usando el token
 router.post('/reset-password', async (req, res) => {
     try {
         const { token, newPassword } = req.body;
 
+        // Verifica que se envie el token y la nueva contrasena
         if (!token || !newPassword) {
             return res.status(400).json({
                 success: false,
-                message: 'Token y nueva contraseña son requeridos'
+                message: 'Token y nueva contrasena son requeridos'
             });
         }
 
-        // Validar contraseña nueva
+        // Verifica que la nueva contrasena tenga al menos 6 caracteres
         if (newPassword.length < 6) {
             return res.status(400).json({
                 success: false,
-                message: 'La contraseña debe tener al menos 6 caracteres'
+                message: 'La contrasena debe tener al menos 6 caracteres'
             });
         }
 
-        // Verificar token de recuperacion
+        // Verifica el token de recuperacion
         let decoded;
         try {
             decoded = jwt.verify(token, process.env.JWT_SECRET || 'cifrado_super_secreto_123');
@@ -338,11 +357,11 @@ router.post('/reset-password', async (req, res) => {
             });
         }
 
-        // Encriptar nueva contraseña
+        // Encripta la nueva contrasena
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-        // Actualizar contraseña en base de datos
+        // Actualiza la contrasena en la base de datos
         const result = await query(`
             UPDATE users
             SET password_hash = $1, updated_at = CURRENT_TIMESTAMP
@@ -350,6 +369,7 @@ router.post('/reset-password', async (req, res) => {
                 RETURNING username, email
         `, [hashedPassword, decoded.userId]);
 
+        // Si no se encuentra el usuario, responde con error
         if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -357,12 +377,14 @@ router.post('/reset-password', async (req, res) => {
             });
         }
 
+        // Responde que la contrasena fue actualizada
         res.json({
             success: true,
-            message: 'Contraseña actualizada exitosamente'
+            message: 'Contrasena actualizada exitosamente'
         });
 
     } catch (error) {
+        // Error interno del servidor
         console.error('Error en reset-password:', error);
         res.status(500).json({
             success: false,
@@ -371,9 +393,10 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-// Obtener perfil del usuario autenticado
+// Ruta para obtener el perfil del usuario autenticado
 router.get('/profile', verifyToken, async (req, res) => {
     try {
+        // Consulta los datos y estadisticas del usuario
         const result = await query(`
       SELECT 
         u.id, u.username, u.email, u.full_name, u.avatar_url, u.created_at,
@@ -387,6 +410,7 @@ router.get('/profile', verifyToken, async (req, res) => {
       GROUP BY u.id, u.username, u.email, u.full_name, u.avatar_url, u.created_at
     `, [req.user.id]);
 
+        // Si no existe el usuario, responde con error
         if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -396,6 +420,7 @@ router.get('/profile', verifyToken, async (req, res) => {
 
         const profile = result.rows[0];
 
+        // Responde con los datos y estadisticas del usuario
         res.json({
             success: true,
             data: {
@@ -416,6 +441,7 @@ router.get('/profile', verifyToken, async (req, res) => {
         });
 
     } catch (error) {
+        // Error interno del servidor
         console.error('Error obteniendo perfil:', error);
         res.status(500).json({
             success: false,

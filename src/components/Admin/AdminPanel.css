@@ -1,0 +1,589 @@
+/* Contenedor principal del panel de administración */
+.admin-panel {
+    background: #f8fafc;
+    padding: 2.5rem 0 3rem 0;
+    min-height: 500px;
+    border-radius: 14px;
+    box-shadow: 0 2px 16px 0 #e3e8f0;
+    max-width: 1100px;
+    margin: 0 auto 2rem auto;
+}
+
+/* Encabezado del panel */
+.admin-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.admin-header h2 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.admin-header p {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* Pestañas de navegación del panel */
+.admin-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.tab-button {
+    background: #f3f0fa;
+    color: #764ba2;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    padding: 0.7rem 2.2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.tab-button.active {
+    background: #764ba2;
+    color: #fff;
+}
+
+/* Contenido principal del panel */
+.admin-content {
+    padding: 2rem 1.5rem 0 1.5rem;
+}
+
+/* Sección de resumen general */
+.admin-overview {
+    margin-bottom: 2.5rem;
+}
+
+/* Tarjetas de estadísticas */
+.admin-stats {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+}
+
+.admin-stat-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px #e3e8f0;
+    padding: 1.2rem 2rem;
+    min-width: 160px;
+    text-align: center;
+}
+
+.admin-stat-card h3 {
+    color: #7b2ff2;
+    font-size: 2.1rem;
+    margin-bottom: 0.2rem;
+}
+
+.admin-stat-card p {
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+/* Resumen de módulos */
+.modules-overview h3 {
+    color: #34495e;
+    margin-bottom: 1rem;
+}
+
+.modules-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.module-summary-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px #e3e8f0;
+    padding: 1rem 1.5rem;
+    min-width: 200px;
+    text-align: center;
+}
+
+.module-summary-card h4 {
+    color: #764ba2;
+    margin-bottom: 0.3rem;
+}
+
+.module-summary-card p {
+    color: #6c757d;
+    margin-bottom: 0.7rem;
+}
+
+/* Acciones de cada módulo */
+.module-actions {
+    display: flex;
+    gap: 0.7rem;
+    justify-content: center;
+}
+
+/* Botones genéricos */
+.btn-small {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary {
+    background: #e3e8f0;
+    color: #34495e;
+}
+
+.btn-primary {
+    background: #764ba2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.3rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-danger {
+    background: #d0a94d;
+    color: #fff;
+}
+
+/* Estados deshabilitados de botones */
+.btn-small:disabled,
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-danger:disabled {
+    background: #b2bec3;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+/* Sección de cursos */
+.admin-courses {
+    margin-bottom: 2.5rem;
+}
+
+/* Encabezado y filtros de cursos */
+.courses-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+}
+
+.courses-header h3 {
+    color: #34495e;
+    margin: 0;
+}
+
+.courses-filters {
+    display: flex;
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-input,
+.filter-select {
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid #e3e8f0;
+    font-size: 1rem;
+    background: #fff;
+    color: #34495e;
+}
+
+/* Texto informativo de cursos */
+.courses-info {
+    color: #888;
+    font-size: 0.97rem;
+    margin-bottom: 0.7rem;
+}
+
+/* Tabla de cursos */
+.courses-table {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px #e3e8f0;
+    margin-bottom: 1.5rem;
+}
+
+.courses-table table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.courses-table th,
+.courses-table td {
+    padding: 0.8rem 1rem;
+    text-align: left;
+}
+
+.courses-table th {
+    background: #f3f0fa;
+    color: #764ba2;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.courses-table tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+/* Tipografías y descripciones de cursos */
+.course-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.2rem;
+}
+
+.course-description {
+    color: #888;
+    font-size: 0.95rem;
+    display: block;
+}
+
+/* Insignias de nivel del curso */
+.level-badge {
+    display: inline-block;
+    padding: 0.2rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: #f3f0fa;
+    color: #764ba2;
+}
+
+.level-badge.level-beginner {
+    background: #e6f9ed;
+    color: #27ae60;
+}
+.level-badge.level-intermediate {
+    background: #fffbe6;
+    color: #f1c40f;
+}
+.level-badge.level-advanced {
+    background: #fee2e2;
+    color: #e74c3c;
+}
+
+/* Insignias de estado del curso */
+.status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: #e3e8f0;
+    color: #34495e;
+}
+
+.status-active {
+    background: #e6f9ed;
+    color: #27ae60;
+}
+.status-inactive {
+    background: #fee2e2;
+    color: #e74c3c;
+}
+
+/* Acciones dentro de la tabla */
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Mensaje sin resultados */
+.no-results {
+    text-align: center;
+    color: #888;
+    padding: 1.5rem 0;
+    font-size: 1.1rem;
+}
+
+/* Paginación de la tabla */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
+    margin-top: 1.2rem;
+}
+
+.pagination-btn {
+    background: #f3f0fa;
+    color: #764ba2;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pagination-btn:disabled {
+    background: #e3e8f0;
+    color: #b2bec3;
+    cursor: not-allowed;
+}
+
+.pagination-numbers {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.pagination-number {
+    background: #fff;
+    color: #764ba2;
+    border: 1px solid #e3e8f0;
+    border-radius: 6px;
+    padding: 0.3rem 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.pagination-number.active {
+    background: #764ba2;
+    color: #fff;
+}
+
+.pagination-dots {
+    color: #b2bec3;
+    padding: 0.3rem 0.8rem;
+}
+
+/* Sección de estudiantes */
+.admin-students {
+    margin-bottom: 2.5rem;
+}
+
+.students-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+}
+
+.students-header h3 {
+    color: #34495e;
+    margin: 0;
+}
+
+/* Filtros de estudiantes */
+.students-filters select {
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid #e3e8f0;
+    font-size: 1rem;
+    background: #fff;
+    color: #34495e;
+}
+
+/* Grid de tarjetas de estudiantes */
+.students-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+/* Tarjeta de estudiante */
+.student-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px #e3e8f0;
+    padding: 1.2rem 1.5rem;
+    min-width: 220px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.student-info h4 {
+    color: #764ba2;
+    margin-bottom: 0.2rem;
+}
+
+.student-info p {
+    color: #6c757d;
+    font-size: 0.97rem;
+    margin-bottom: 0.7rem;
+}
+
+/* Métricas de estudiante */
+.student-stats {
+    display: flex;
+    gap: 1.2rem;
+    margin-bottom: 0.7rem;
+}
+
+.student-stat {
+    text-align: center;
+}
+
+.stat-number {
+    font-weight: 700;
+    color: #7b2ff2;
+    font-size: 1.2rem;
+}
+
+.stat-label {
+    color: #888;
+    font-size: 0.95rem;
+}
+
+/* Modal para agregar curso */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: slide-down 0.3s ease-out;
+}
+
+/* Animación de aparición del modal */
+@keyframes slide-down {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Encabezado del modal */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1f2937;
+}
+
+/* Botón de cierre del modal */
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #6b7280;
+    line-height: 1;
+}
+
+/* Formulario del modal */
+.modal-form .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.modal-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.modal-form input[type="text"],
+.modal-form input[type="number"],
+.modal-form textarea,
+.modal-form select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Estados de foco en inputs del modal */
+.modal-form input:focus,
+.modal-form textarea:focus,
+.modal-form select:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+}
+
+/* Textarea del modal */
+.modal-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Filas y controles del formulario del modal */
+.modal-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group-checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.form-group-checkbox label {
+    margin-bottom: 0;
+    margin-left: 0.5rem;
+    font-weight: normal;
+}
+
+.form-group-checkbox input {
+    width: auto;
+}
+
+/* Pie del modal con acciones */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}

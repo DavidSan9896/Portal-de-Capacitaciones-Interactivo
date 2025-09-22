@@ -1,0 +1,178 @@
+.header {
+    background: #22193a;
+    color: #ffffff;
+    padding: 2rem 0;
+    border-bottom: 3px solid rgba(6, 133, 31, 0.08);
+}
+
+.header-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.login-btn,
+.logout-btn {
+    background: transparent;
+    border: 1px solid #000000;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 0.45rem 1rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.login-btn:hover,
+.logout-btn:hover {
+    background: #a98dd9;
+    color: #fff;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.user-role {
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.user-role.admin {
+    color: #540d32;
+}
+
+.user-role.student {
+    color: #27ae60;
+}
+
+.admin-badge {
+    background: #57052b;
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.login-menu {
+    background: #f7f3ff;
+    color: #2d1457;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(123, 47, 242, 0.12);
+    padding: 1.1rem;
+    position: absolute;
+    right: 0;
+    top: 2.8rem;
+    min-width: 220px;
+    max-width: 280px;
+    z-index: 100;
+}
+
+.login-tabs {
+    display: flex;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+}
+
+.tab-btn {
+    flex: 1;
+    background: #f0f2f5;
+    color: #444;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.tab-btn.active {
+    background: #7b2ff2;
+    color: #fff;
+}
+
+.input {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid #e0e6ed;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    background: #fdfdfd;
+    transition: border 0.2s ease;
+}
+
+.input:focus {
+    border-color: #3f1b77;
+    outline: none;
+}
+
+.submit-btn,
+.forgot-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 0.55rem 1.2rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.submit-btn {
+    background: #7b2ff2;
+    color: #fff;
+}
+
+.submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.forgot-btn {
+    background: #ede7fa;
+    color: #7b2ff2;
+}
+
+.login-error {
+    color: #e74c3c;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.login-message {
+    color: #27ae60;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.test-users {
+    background: #faf7ff;
+    color: #7b2ff2;
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    font-weight: 500;
+}
