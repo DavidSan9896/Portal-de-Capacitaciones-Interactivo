@@ -5,12 +5,12 @@ import React, {useState, useEffect} from 'react';
 import './App.css';
 
 // Componentes principales
-import Header from './components/Layout/Header';
-import ModuleCard from './components/Courses/ModuleCard';
-import LoadingSpinner from './components/Layout/LoadingSpinner';
-import StudentProgress from './components/Student/StudentProgress';
-import AdminPanel from './components/Admin/AdminPanel';
-import CourseEnrollment from './components/Courses/CourseEnrollemnt';
+import Header from './components/Layout/Header.jsx';
+import ModuleCard from './components/Courses/ModuleCard.jsx';
+import LoadingSpinner from './components/Layout/LoadingSpinner.jsx';
+import StudentProgress from './components/Student/StudentProgress.jsx';
+import AdminPanel from './components/Admin/AdminPanel.jsx';
+import CourseEnrollment from './components/Courses/CourseEnrollemnt.jsx';
 
 // Servicios para traer datos de la API
 import {getModules, getCourses, verifyToken} from './services/api';
