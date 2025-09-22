@@ -16,7 +16,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "docker:up": "docker compose up -d --build db backend frontend",
+    "docker:seed": "docker compose run --rm seed-users",
+    "docker:dev": "npm run docker:up && npm run docker:seed",
+    "docker:down": "docker compose down -v"
   },
   "eslintConfig": {
     "extends": [

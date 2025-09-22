@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  # Base de datos PostgreSQL
   db:
     image: postgres:15-alpine
-    container_name: training_portal_db
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: training_portal
-      POSTGRES_USER: PortalDavid
-      POSTGRES_PASSWORD: Paswor$23
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -16,37 +16,44 @@ services:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - training_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
-  # Backend Node.js
   backend:
     build: ./backend
-    container_name: training_portal_backend
+    env_file:
+      - .env
     environment:
       NODE_ENV: development
       DB_HOST: db
       DB_PORT: 5432
-      DB_NAME: training_portal
-      DB_USER: PortalDavid
-      DB_PASSWORD: Paswor$23
-      JWT_SECRET: cifrado_super_secreto_123
-      PORT: 3000
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: ${BACKEND_PORT:-3000}
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT:-3000}:3000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - /app/node_modules
     networks:
       - training_network
 
-  # Frontend React
   frontend:
     build: .
-    container_name: training_portal_frontend
+    env_file:
+      - .env
     environment:
-      REACT_APP_API_URL: http://localhost:3000/api
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:3000/api}
     ports:
-      - "3001:3000"
+      - "${FRONTEND_PORT:-3001}:3000"
     depends_on:
       - backend
     volumes:
@@ -55,9 +62,28 @@ services:
     networks:
       - training_network
 
+  seed-users:
+    build: ./backend
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["node", "scripts/seed-users.js"]
+    networks:
+      - training_network
+    restart: "no"
+
 volumes:
   postgres_data:
-# Uso del tipo de red
+
 networks:
   training_network:
     driver: bridge

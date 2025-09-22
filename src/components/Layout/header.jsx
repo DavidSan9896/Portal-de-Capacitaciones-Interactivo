@@ -201,8 +201,8 @@ const Header = ({ user, onLogin, onLogout }) => {
                                     {activeTab === 'login' && (
                                         <div className="test-users">
                                             <strong>Usuarios de prueba:</strong><br />
-                                            Admin: admin / password<br />
-                                            Estudiante: ana.rodriguez / password
+                                            Admin: admin / Admi12345d <br />
+                                            Usuario: ana.rodriguez / 1234userC
                                         </div>
                                     )}
                                 </div>

@@ -133,17 +133,17 @@ VALUES
 
 -- Usuario administrador
 INSERT INTO users (username, email, password_hash, full_name)
-VALUES ('admin', 'admin@academia-musical.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-        'Administrador Academia');
+VALUES ('admin', 'admin@academia-musical.com', '$2b$10$unGPfgMPQPhfqg9MVQfBgOmWAJjAIbiJtd18hjIEX0sSR83IaoyE.', 'Administrador Academia');
+
 
 -- Usuarios estudiantes
 INSERT INTO users (username, email, password_hash, full_name)
-VALUES ('ana.rodriguez', 'ana.rodriguez@email.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Ana Rodriguez'),
-       ('carlos.mendez', 'carlos.mendez@email.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carlos Mendez'),
-       ('maria.lopez', 'maria.lopez@email.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Maria Lopez'),
-       ('pedro.garcia', 'pedro.garcia@email.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Pedro Garcia'),
-       ('sofia.martinez', 'sofia.martinez@email.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Sofia Martinez'),
-       ('luis.hernandez', 'luis.hernandez@email.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Luis Hernandez');
+VALUES('ana.rodriguez', 'ana.rodriguez@email.com', '$2b$10$JlnV4D0DyyztelTJ7IzTnu6Cgzj0mSIgaYfaPX5mDvG7DBuIhiz5e', 'Ana Rodriguez'),
+       ('carlos.mendez', 'carlos.mendez@email.com', '$2b$10$b7Pv4OQw6E2VY0Dr2E5n1.MqQbjWOc3B.VJBYQ9aN.d5RZVS7mtXW', 'Carlos Mendez'),
+       ('maria.lopez', 'maria.lopez@email.com', '$2b$10$rMSXFBnaNcRtUelK.oMVBO/INORrBuwKX2K/.LCNtSt5irnialUQy', 'Maria Lopez'),
+       ('pedro.garcia', 'pedro.garcia@email.com', '$2b$10$as4dDQhf.744UOp4g7hGc.MPiX/GEs.3wbqKmqtiYf.QQzRFMtQ5i', 'Pedro Garcia'),
+       ('sofia.martinez', 'sofia.martinez@email.com', '$2b$10$LKwMad3hv4xr1pXYZvYopuT0JBOFV5.cXNL81Q3DwIoGWhFW50HPu', 'Sofia Martinez'),
+       ('luis.hernandez', 'luis.hernandez@email.com', '$2b$10$IEJqPdVMEr79UKm2mUuC/OVHkPF8s.nT6px1T0Z2ysxspERlrWDbu', 'Luis Hernandez');
 
 -- Insertar progreso de ejemplo para algunos usuarios
 INSERT INTO user_progress (user_id, course_id, status, progress_percentage, started_at, completed_at, last_accessed)
