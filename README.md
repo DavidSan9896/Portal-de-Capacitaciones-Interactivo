@@ -31,7 +31,7 @@
 
 Para facilitar las pruebas de la API, este repositorio incluye una colección de **Postman** ubicada en la carpeta [`/postman`](./postman).
 
-- Archivo: `portal-capacitaciones.postman_collection.json`
+- Archivo: `Reto Banco.postman_collection Postman.json`
 
 ### Cómo usarla
 1. Abrir **Postman** en tu equipo.  
@@ -40,5 +40,6 @@ Para facilitar las pruebas de la API, este repositorio incluye una colección de
 4. Una vez importada, podrás probar los **endpoints del portal** (login, cursos, progreso, etc.) de forma inmediata.  
 
 Esto permite validar y consumir los servicios REST sin necesidad de configurar manualmente cada petición.
+
 
 
