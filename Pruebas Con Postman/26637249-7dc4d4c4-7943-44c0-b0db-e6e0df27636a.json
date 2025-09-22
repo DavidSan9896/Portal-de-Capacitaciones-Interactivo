@@ -302,7 +302,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"title\": \"Armonía Moderna I\",\r\n  \"description\": \"Contenido actualizado\",\r\n  \"module_id\": 2,\r\n  \"level\": \"intermediate\",\r\n  \"duration_minutes\": 75,\r\n  \"instructor_name\": \"Juan Pérez\",\r\n  \"is_active\": true\r\n}\r\n",
+							"raw": "{\r\n  \"title\": \"Armonía Moderna I\",\r\n  \"description\": \"Contenido actualizado\",\r\n  \"module_id\": 2,\r\n  \"level\": \"intermediate\",\r\n  \"duration_minutes\": 20,\r\n  \"instructor_name\": \"Juan Pérez\",\r\n  \"is_active\": true\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
