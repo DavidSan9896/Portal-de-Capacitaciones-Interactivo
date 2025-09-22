@@ -326,7 +326,7 @@
 					"response": []
 				},
 				{
-					"name": "New Request",
+					"name": "Add Curse",
 					"id": "26637249-0d71548f-cc09-4651-bb12-4f91418dac46",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
