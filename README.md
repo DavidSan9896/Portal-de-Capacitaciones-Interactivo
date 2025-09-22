@@ -52,6 +52,7 @@ DEFAULT_USER_PASSWORD=super_secre_cambia_esdto
 
 3. **Levantar los contenedores con Docker Compose**
 
+Tener Docker abierto
    ```bash
    docker-compose up --build
    ```
@@ -68,6 +69,7 @@ Para facilitar las pruebas de la API, este repositorio incluye una colección de
 4. Una vez importada, podrás probar los **endpoints del portal** (login, cursos, progreso, etc.) de forma inmediata.  
 
 Esto permite validar y consumir los servicios REST sin necesidad de configurar manualmente cada petición.
+
 
 
 
