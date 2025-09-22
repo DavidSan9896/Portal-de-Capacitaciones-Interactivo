@@ -1,3 +1,6 @@
+Tambien vas a encontra un documento con el manual de usuario 
+en la carpeta de manuales
+un archivo pdf
 Aqui podran encontar el paso a paso para hacer los cambios necesarios 
 ```markdown
 # Portal de Capacitaciones
@@ -65,6 +68,7 @@ Para facilitar las pruebas de la API, este repositorio incluye una colección de
 4. Una vez importada, podrás probar los **endpoints del portal** (login, cursos, progreso, etc.) de forma inmediata.  
 
 Esto permite validar y consumir los servicios REST sin necesidad de configurar manualmente cada petición.
+
 
 
 
