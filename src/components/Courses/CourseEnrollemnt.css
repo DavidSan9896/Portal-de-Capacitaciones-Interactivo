@@ -27,7 +27,7 @@
 }
 
 .btn {
-    background: #e3e8f0;
+    background: #b7c9cc;
     color: #764ba2;
     border: none;
     border-radius: 6px;
@@ -40,7 +40,7 @@
 
 .btn-accent {
     background: #7b2ff2;
-    color: #fff;
+    color: rgba(225, 223, 223, 0.97);
 }
 
 .btn-accent:hover {
@@ -64,7 +64,7 @@
 }
 
 .progress-btn {
-    background: #f3f0fa;
+    background: #d6d6d9;
     color: #764ba2;
     border: none;
     border-radius: 6px;

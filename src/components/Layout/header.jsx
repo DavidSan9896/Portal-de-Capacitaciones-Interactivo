@@ -197,14 +197,6 @@ const Header = ({ user, onLogin, onLogout }) => {
                                             <button className="forgot-btn" type="button" onClick={() => handleTabChange('login')}>Volver al login</button>
                                         </form>
                                     )}
-                                    {/* Usuarios de prueba para facilitar el acceso */}
-                                    {activeTab === 'login' && (
-                                        <div className="test-users">
-                                            <strong>Usuarios de prueba:</strong><br />
-                                            Admin: admin / Admi12345d <br />
-                                            Usuario: ana.rodriguez / 1234userC
-                                        </div>
-                                    )}
                                 </div>
                             )}
                         </div>

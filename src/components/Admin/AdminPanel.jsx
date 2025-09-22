@@ -2,9 +2,10 @@
 // Autor: David Santiago Cubillos M.
 // Panel de Administracion para gestionar modulos, cursos y estudiantes
 
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import './AdminPanel.css';
-import {getModules, getCourses} from '../../services/api';
+import { getModules, getCourses } from '../../services/api';
 
 // Modal para ver estudiantes de un curso
 const CourseStudentsModal = ({isOpen, onClose, course, students, loading, error}) => {
@@ -552,7 +553,6 @@ const AdminPanel = ({user}) => {
                                             >
                                                 Editar
                                             </button>
-                                            <button className="btn-small btn-danger">Pausar</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -572,20 +572,23 @@ const AdminPanel = ({user}) => {
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="pagination-btn"
+                            className="pagination-btn flex items-center gap-1"
                         >
-                            ← Anterior
+                            <ChevronLeft className="w-5 h-5"/>
+                            <span className="hidden sm:inline"></span>
                         </button>
 
                         <div className="pagination-numbers">
                             {getPaginationNumbers().map((page, index) => (
                                 <React.Fragment key={index}>
-                                    {page === '...' ? (
+                                    {page === "..." ? (
                                         <span className="pagination-dots">...</span>
                                     ) : (
                                         <button
                                             onClick={() => handlePageChange(page)}
-                                            className={`pagination-number ${currentPage === page ? 'active' : ''}`}
+                                            className={`pagination-number ${
+                                                currentPage === page ? "active" : ""
+                                            }`}
                                         >
                                             {page}
                                         </button>
@@ -597,9 +600,10 @@ const AdminPanel = ({user}) => {
                         <button
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className="pagination-btn"
+                            className="pagination-btn flex items-center gap-1"
                         >
-                            Siguiente →
+                            <span className="hidden sm:inline"></span>
+                            <ChevronRight className="w-5 h-5"/>
                         </button>
                     </div>
                 )}
@@ -648,10 +652,10 @@ const AdminPanel = ({user}) => {
         });
 
         return (
-        <div className="admin-students">
-            <div className="students-header">
-                <h3>Estudiantes Registrados</h3>
-                <div className="students-filters">
+            <div className="admin-students">
+                <div className="students-header">
+                    <h3>Estudiantes Registrados</h3>
+                    <div className="students-filters">
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
@@ -659,43 +663,45 @@ const AdminPanel = ({user}) => {
                             <option value="all">Todos los estudiantes</option>
                             <option value="active">Activos</option>
                             <option value="inactive">Inactivos</option>
-                    </select>
+                        </select>
+                    </div>
                 </div>
-            </div>
 
                 {loading && <p>Cargando estudiantes...</p>}
                 {error && <p className="error-text">Error: {error}</p>}
 
                 {/* Muestra los estudiantes en tarjetas */}
                 {!loading && !error && (
-            <div className="students-grid">
+                    <div className="students-grid">
                         {filteredStudents.length > 0 ? (
                             filteredStudents.map(student => (
-                    <div key={student.id} className="student-card">
-                        <div className="student-info">
+                                <div key={student.id} className="student-card">
+                                    <div className="student-info">
                                         <h4>{student.name || `${student.first_name ?? ''} ${student.last_name ?? ''}`.trim() || 'Sin nombre'}</h4>
                                         <p>{student.email || '—'}</p>
-                        </div>
-                        <div className="student-stats">
-                            <div className="student-stat">
-                                            <span className="stat-number">{student.courses ?? student.courses_count ?? student.enrollments_count ?? 0}</span>
-                                <span className="stat-label">Cursos</span>
-                            </div>
-                            <div className="student-stat">
-                                            <span className="stat-number">{(student.progress ?? student.avg_progress ?? 0)}%</span>
-                                <span className="stat-label">Progreso</span>
-                            </div>
-                        </div>
-                        <button className="btn-small">Ver Detalles</button>
-                    </div>
+                                    </div>
+                                    <div className="student-stats">
+                                        <div className="student-stat">
+                                            <span
+                                                className="stat-number">{student.courses ?? student.courses_count ?? student.enrollments_count ?? 0}</span>
+                                            <span className="stat-label">Cursos</span>
+                                        </div>
+                                        <div className="student-stat">
+                                            <span
+                                                className="stat-number">{(student.progress ?? student.avg_progress ?? 0)}%</span>
+                                            <span className="stat-label">Progreso</span>
+                                        </div>
+                                    </div>
+                                    <button className="btn-small">Ver Detalles</button>
+                                </div>
                             ))
                         ) : (
                             <p className="no-results">No hay estudiantes.</p>
                         )}
-            </div>
+                    </div>
                 )}
-        </div>
-    );
+            </div>
+        );
     };
 
     // Render principal del panel

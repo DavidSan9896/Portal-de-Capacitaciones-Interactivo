@@ -83,7 +83,7 @@
 .course-card {
     background: #fff;
     border-radius: 10px;
-    box-shadow: 0 1px 6px #e3e8f0;
+    box-shadow: 0 1px 6px #c9cacb;
     padding: 1.2rem 1.5rem;
     min-width: 260px;
     max-width: 340px;
@@ -94,7 +94,7 @@
 }
 
 .course-card:hover {
-    box-shadow: 0 4px 16px #d1c4e9;
+    box-shadow: 0 4px 16px #a59cb7;
 }
 
 .course-header {
@@ -105,7 +105,7 @@
 }
 
 .course-title {
-    color: #764ba2;
+    color: rgba(112, 26, 37, 0.87);
     font-size: 1.2rem;
     font-weight: 600;
 }
@@ -147,7 +147,7 @@
 }
 
 .course-start-button {
-    background: #7b2ff2;
+    background: #2d2149;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -193,6 +193,13 @@
     cursor: pointer;
     margin-top: 1rem;
     transition: background 0.2s;
+}
+
+.logo-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(25, 30, 30, 0.15);
 }
 
 .retry-button:disabled {

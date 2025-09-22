@@ -2,6 +2,8 @@
 // Autor: David C.<3 M.
 // Importa React y hooks para manejar estado y efectos
 import React, {useState, useEffect} from 'react';
+import { Trophy } from "lucide-react";
+
 // Importa estilos CSS
 import './StudentProgress.css';
 // Importa el componente para inscribirse a cursos
@@ -326,12 +328,15 @@ const StudentProgress = ({user, refreshFlag}) => {
                     <h3>Mis Insignias</h3>
                     <div className="badges-grid">
                         {progress.badges.map(badge => (
-                            <div key={`${badge.course_id}-${badge.earned_at}`} className="badge-item">
+                            <div
+                                key={`${badge.course_id}-${badge.earned_at}`}
+                                className="badge-item"
+                            >
                                 <div
-                                    className="badge-icon"
-                                    style={{backgroundColor: badge.module_color}}
+                                    className="badge-icon flex items-center justify-center"
+                                    style={{ backgroundColor: badge.module_color }}
                                 >
-                                    Insignia
+                                    <Trophy className="w-6 h-6 text-white" />
                                 </div>
                                 <div className="badge-name">{badge.course_title}</div>
                                 <div className="badge-description">

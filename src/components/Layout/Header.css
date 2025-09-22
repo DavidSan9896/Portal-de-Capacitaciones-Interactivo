@@ -1,8 +1,8 @@
 .header {
     background: #22193a;
     color: #ffffff;
-    padding: 1rem 0;
-    border-bottom: 1px solid rgba(6, 133, 31, 0.08);
+    padding: 2rem 0;
+    border-bottom: 3px solid rgba(6, 133, 31, 0.08);
 }
 
 .header-container {

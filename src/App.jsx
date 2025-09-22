@@ -295,6 +295,10 @@ function App() {
                     !selectedModule ? (
                         <div className="modules-section">
                             <div className="hero-section">
+                                <img
+                                    src="/favicon.ico"
+                                    alt="logo-img"
+                                    className="logo-img"/>
                                 <h1 className="hero-title">
                                     Portal de Capacitaciones Musicales
                                 </h1>
@@ -318,7 +322,7 @@ function App() {
                             <div className="courses-header">
                                 <button
                                     onClick={handleBackToModules}
-                                    className="back-to-modules-btn">Volver a modulos >
+                                    className="back-to-modules-btn">Volver a modulos
                                 </button>
                                 <h1 className="courses-title">
                                     {selectedModule.display_name}

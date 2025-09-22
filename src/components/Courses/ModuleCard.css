@@ -1,5 +1,5 @@
 .module-card {
-    background: #fff;
+    background: rgba(224, 222, 222, 0.89);
     border-radius: 12px;
     box-shadow: 0 1px 8px #e3e8f0;
     padding: 1.5rem 1.2rem 1.2rem 1.2rem;
@@ -15,7 +15,7 @@
 }
 
 .module-card:hover {
-    box-shadow: 0 4px 18px #d1d8e6;
+    box-shadow: 0 4px 18px rgba(188, 192, 197, 0.96);
     transform: translateY(-4px) scale(1.03);
 }
 
@@ -42,7 +42,7 @@
 
 .btn {
     background: #e3e8f0;
-    color: #764ba2;
+    color: #694a8a;
     border: none;
     border-radius: 6px;
     padding: 0.4rem 1.1rem;
@@ -53,10 +53,10 @@
 }
 
 .btn-accent {
-    background: #7b2ff2;
+    background: #5e19c9;
     color: #fff;
 }
 
 .btn-accent:hover {
-    background: #764ba2;
+    background: #70457e;
 }
