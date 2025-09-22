@@ -1,7 +1,5 @@
-// Dashboard del estudiante con progreso real
 import React, {useState, useEffect} from 'react';
 import CourseEnrollment from "../Courses/CourseEnrollemnt";
-
 
 const StudentProgress = ({user, refreshFlag}) => {
     const [progress, setProgress] = useState({
@@ -19,6 +17,7 @@ const StudentProgress = ({user, refreshFlag}) => {
     const [error, setError] = useState(null);
     const [availableCourses, setAvailableCourses] = useState([]);
     const [showAvailableCourses, setShowAvailableCourses] = useState(false);
+    const [deleting, setDeleting] = useState({});
 
     useEffect(() => {
         if (user && user.id) {
@@ -69,10 +68,8 @@ const StudentProgress = ({user, refreshFlag}) => {
     };
 
     const handleCourseClick = (courseId) => {
-        // Navegar al curso o abrir modal de detalles
         console.log('Clicked course:', courseId);
     };
-
 
     const getStatusText = (status) => {
         switch (status) {
@@ -95,13 +92,29 @@ const StudentProgress = ({user, refreshFlag}) => {
                 return '#95a5a6';
         }
     };
-    // Sumar progreso
+
+    // Sumar progreso (UI optimista + sincronización)
     const handleContinueCourse = async (course) => {
         if (!user || !user.id) return;
         const nuevoProgreso = Math.min((course.progress_percentage || 0) + 5, 100);
+        const nuevoStatus = nuevoProgreso >= 100 ? 'completed' : 'started';
+
+        // Actualización optimista de la UI
+        setProgress(prev => ({
+            ...prev,
+            current_courses: prev.current_courses.map(c =>
+                c.id === course.id
+                    ? {
+                        ...c,
+                        progress_percentage: nuevoProgreso,
+                        status: nuevoStatus
+                    }
+                    : c
+            )
+        }));
 
         try {
-            await fetch(`http://localhost:3000/api/students/progress/${course.id}`, {
+            const res = await fetch(`http://localhost:3000/api/students/progress/${course.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': 'Bearer token_temp',
@@ -110,32 +123,93 @@ const StudentProgress = ({user, refreshFlag}) => {
                 },
                 body: JSON.stringify({
                     progress_percentage: nuevoProgreso,
+                    status: nuevoStatus,  // Agregar el status
                     notes: `Progreso actualizado a ${nuevoProgreso}%`
                 })
             });
-            if (typeof triggerRefreshProgress === 'function') triggerRefreshProgress();
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || data.success === false) {
+                throw new Error(data.message || 'Fallo al actualizar el progreso');
+            }
+
+            // Recargar el progreso completo para actualizar estadísticas y badges
+            await loadStudentProgress();
+
+            // Si se completó el curso, actualizar cursos disponibles
+            if (nuevoProgreso >= 100) {
+                await loadAvailableCourses();
+            }
+
         } catch (err) {
+            // Revertir cambios en caso de error
+            setProgress(prev => ({
+                ...prev,
+                current_courses: prev.current_courses.map(c =>
+                    c.id === course.id
+                        ? {
+                            ...c,
+                            progress_percentage: course.progress_percentage,
+                            status: course.status
+                        }
+                        : c
+                )
+            }));
             alert('Error al actualizar el progreso');
+            console.error('Error:', err);
         }
     };
-    // Elimianr cursos del progreso
+
+    // Eliminar curso del progreso
     const handleDeleteCourse = async (course) => {
         if (!user || !user.id) return;
-        if (!window.confirm('¿Seguro que deseas eliminar este curso de tu progreso?')) return;
+
+        const confirmDelete = window.confirm(`¿Estás seguro que deseas eliminar el curso "${course.title}" de tu progreso? Esta acción no se puede deshacer.`);
+        if (!confirmDelete) return;
+
+        setDeleting(prev => ({...prev, [course.id]: true}));
+        const prevCourses = [...progress.current_courses];
+
+        setProgress(prev => ({
+            ...prev,
+            current_courses: prev.current_courses.filter(c => c.id !== course.id)
+        }));
 
         try {
-            await fetch(`http://localhost:3000/api/students/progress/${course.id}`, {
+            // Usar la ruta correcta del backend
+            const response = await fetch(`http://localhost:3000/api/students/enroll/${course.id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': 'Bearer token_temp',
-                    'user-id': user.id.toString()
+                    'user-id': user.id.toString(),
+                    'Content-Type': 'application/json'
                 }
             });
-            if (typeof triggerRefreshProgress === 'function') triggerRefreshProgress();
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error del servidor: ${response.status}`);
+            }
+
+            await loadStudentProgress();
+            await loadAvailableCourses();
+
         } catch (err) {
-            alert('Error al eliminar el curso');
+            setProgress(prev => ({
+                ...prev,
+                current_courses: prevCourses
+            }));
+            alert(`Error al eliminar el curso: ${err.message}`);
+            console.error('Error eliminando curso:', err);
+        } finally {
+            setDeleting(prev => {
+                const copy = {...prev};
+                delete copy[course.id];
+                return copy;
+            });
         }
     };
+
 
     if (loading) {
         return (
@@ -184,8 +258,8 @@ const StudentProgress = ({user, refreshFlag}) => {
                                             className="course-status"
                                             style={{color: getStatusColor(course.status)}}
                                         >
-                                    {getStatusText(course.status)}
-                                </span>
+                                                {getStatusText(course.status)}
+                                            </span>
                                     </div>
                                     <p className="course-description">{course.description}</p>
                                 </div>
@@ -206,15 +280,16 @@ const StudentProgress = ({user, refreshFlag}) => {
                                         <button
                                             className="continue-button"
                                             onClick={() => handleContinueCourse(course)}
-                                            disabled={course.progress_percentage >= 100}
+                                            disabled={course.progress_percentage >= 100 || !!deleting[course.id]}
                                         >
                                             {course.status === 'completed' ? 'Revisar' : 'Continuar'}
                                         </button>
                                         <button
                                             className="delete-button"
                                             onClick={() => handleDeleteCourse(course)}
+                                            disabled={!!deleting[course.id]}
                                         >
-                                            Eliminar
+                                            {deleting[course.id] ? 'Eliminando...' : 'Eliminar'}
                                         </button>
                                     </div>
                                 </div>
