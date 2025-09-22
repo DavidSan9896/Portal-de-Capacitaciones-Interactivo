@@ -1,16 +1,192 @@
-// Panel de administracion para gestionar cursos
+// src/components/Admin/AdminPanel.jsx
 import React, {useState, useEffect} from 'react';
 import './AdminPanel.css';
 import {getModules, getCourses} from '../../services/api';
+
+// Modal para ver estudiantes de un curso
+const CourseStudentsModal = ({isOpen, onClose, course, students, loading, error}) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <div className="modal-header">
+                    <h2>Estudiantes del curso {course ? `"${course.title}"` : ''}</h2>
+                    <button onClick={onClose} className="modal-close-btn">&times;</button>
+                </div>
+
+                <div className="modal-body">
+                    {loading && <p>Cargando estudiantes...</p>}
+                    {error && <p className="error-text">Error: {error}</p>}
+                    {!loading && !error && (
+                        students.length > 0 ? (
+                            <div className="courses-table">
+                                <table>
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Progreso</th>
+                                        <th>Inscripción</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {students.map(s => (
+                                        <tr key={s.id}>
+                                            <td>{s.id}</td>
+                                            <td>{s.name || `${s.first_name ?? ''} ${s.last_name ?? ''}`.trim()}</td>
+                                            <td>{s.email}</td>
+                                            <td>{s.progress != null ? `${s.progress}%` : '—'}</td>
+                                            <td>{s.enrolled_at ? new Date(s.enrolled_at).toLocaleDateString() : '—'}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p>No hay estudiantes inscritos en este curso.</p>
+                        )
+                    )}
+                </div>
+
+                <div className="modal-footer">
+                    <button type="button" onClick={onClose} className="btn-secondary">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Componente del Modal para agregar/editar curso
+const AddCourseModal = ({isOpen, onClose, onSave, modules, initialCourse = null, titleText, submitLabel}) => {
+    const defaultData = {
+        title: '',
+        description: '',
+        module_id: modules.length > 0 ? modules[0].id : '',
+        level: 'beginner',
+        duration_minutes: 60,
+        instructor_name: '',
+        is_active: true
+    };
+
+    const [courseData, setCourseData] = useState(initialCourse ? {...defaultData, ...initialCourse} : defaultData);
+
+    useEffect(() => {
+        if (isOpen) {
+            setCourseData(initialCourse ? {...defaultData, ...initialCourse} : defaultData);
+        }
+    }, [isOpen, modules, initialCourse]);
+
+    if (!isOpen) return null;
+
+    const handleChange = (e) => {
+        const {name, value, type, checked} = e.target;
+        setCourseData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!courseData.title || !courseData.module_id || !courseData.instructor_name) {
+            alert('Por favor, completa los campos obligatorios: Título, Módulo e Instructor.');
+            return;
+        }
+        const payload = {
+            ...courseData,
+            module_id: parseInt(courseData.module_id, 10),
+            duration_minutes: parseInt(courseData.duration_minutes, 10)
+        };
+        onSave(payload);
+    };
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <div className="modal-header">
+                    <h2>{titleText || 'Agregar Nuevo Curso'}</h2>
+                    <button onClick={onClose} className="modal-close-btn">&times;</button>
+                </div>
+                <form onSubmit={handleSubmit} className="modal-form">
+                    <div className="form-group">
+                        <label htmlFor="title">Título del Curso</label>
+                        <input type="text" id="title" name="title" value={courseData.title} onChange={handleChange}
+                               required/>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="description">Descripción</label>
+                        <textarea id="description" name="description" value={courseData.description}
+                                  onChange={handleChange}></textarea>
+                    </div>
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label htmlFor="module_id">Módulo</label>
+                            <select id="module_id" name="module_id" value={courseData.module_id} onChange={handleChange}
+                                    required>
+                                {modules.map(m => <option key={m.id} value={m.id}>{m.display_name}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="level">Nivel</label>
+                            <select id="level" name="level" value={courseData.level} onChange={handleChange}>
+                                <option value="beginner">Principiante</option>
+                                <option value="intermediate">Intermedio</option>
+                                <option value="advanced">Avanzado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label htmlFor="duration_minutes">Duración (minutos)</label>
+                            <input type="number" id="duration_minutes" name="duration_minutes" min="1"
+                                   value={courseData.duration_minutes} onChange={handleChange}/>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="instructor_name">Instructor</label>
+                            <input type="text" id="instructor_name" name="instructor_name"
+                                   value={courseData.instructor_name} onChange={handleChange} required/>
+                        </div>
+                    </div>
+                    <div className="form-group form-group-checkbox">
+                        <label htmlFor="is_active">
+                            <input type="checkbox" id="is_active" name="is_active" checked={courseData.is_active}
+                                   onChange={handleChange}/>
+                            Curso Activo
+                        </label>
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" onClick={onClose} className="btn-secondary">Cancelar</button>
+                        <button type="submit" className="btn-primary">{submitLabel || 'Guardar Curso'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 const AdminPanel = ({user}) => {
     const [activeTab, setActiveTab] = useState('overview');
     const [modules, setModules] = useState([]);
     const [allCourses, setAllCourses] = useState([]);
+    const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
+
+    // Edición de curso
+    const [isEditCourseModalOpen, setIsEditCourseModalOpen] = useState(false);
+    const [editingCourse, setEditingCourse] = useState(null);
+
+    // Ver estudiantes
+    const [isStudentsModalOpen, setIsStudentsModalOpen] = useState(false);
+    const [studentsCourse, setStudentsCourse] = useState(null);
+    const [courseStudents, setCourseStudents] = useState([]);
+    const [loadingStudents, setLoadingStudents] = useState(false);
+    const [studentsError, setStudentsError] = useState(null);
+
     const [stats, setStats] = useState({
         totalModules: 0,
         totalCourses: 0,
-        totalStudents: 5, // Simulado
+        totalStudents: 5,
         recentActivity: []
     });
 
@@ -31,7 +207,6 @@ const AdminPanel = ({user}) => {
             }
 
             if (coursesResponse.success) {
-                // Convertir el objeto coursesByModule a array plano
                 const coursesArray = [];
                 Object.values(coursesResponse.data).forEach(moduleData => {
                     coursesArray.push(...moduleData.courses);
@@ -42,6 +217,94 @@ const AdminPanel = ({user}) => {
         } catch (error) {
             console.error('Error cargando datos:', error);
         }
+    };
+
+    const handleSaveNewCourse = async (courseData) => {
+        try {
+            const response = await fetch('http://localhost:3000/api/courses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer token_temp'
+                },
+                body: JSON.stringify(courseData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al guardar el curso');
+            }
+
+            alert('Curso agregado exitosamente');
+            setIsAddCourseModalOpen(false);
+            await loadData();
+        } catch (error) {
+            console.error('Error al guardar el curso:', error);
+            alert(`Error al guardar el curso: ${error.message}`);
+        }
+    };
+
+    const handleOpenEditCourse = (course) => {
+        setEditingCourse(course);
+        setIsEditCourseModalOpen(true);
+    };
+
+    const handleUpdateCourse = async (courseData) => {
+        if (!editingCourse) return;
+        try {
+            const response = await fetch(`http://localhost:3000/api/courses/${editingCourse.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer token_temp'
+                },
+                body: JSON.stringify(courseData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al actualizar el curso');
+            }
+
+            alert('Curso actualizado exitosamente');
+            setIsEditCourseModalOpen(false);
+            setEditingCourse(null);
+            await loadData();
+        } catch (error) {
+            console.error('Error al actualizar el curso:', error);
+            alert(`Error al actualizar el curso: ${error.message}`);
+        }
+    };
+
+    // Abrir modal de estudiantes y cargar lista
+    const handleOpenCourseStudents = async (course) => {
+        setStudentsCourse(course);
+        setIsStudentsModalOpen(true);
+        setLoadingStudents(true);
+        setStudentsError(null);
+        try {
+            const res = await fetch(`http://localhost:3000/api/courses/${course.id}/students`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer token_temp'
+                }
+            });
+            if (!res.ok) throw new Error('Error al cargar estudiantes');
+
+            const data = await res.json();
+            const list = Array.isArray(data) ? data : (data.data ?? []);
+            setCourseStudents(list);
+        } catch (e) {
+            setStudentsError(e.message);
+            setCourseStudents([]);
+        } finally {
+            setLoadingStudents(false);
+        }
+    };
+
+    const handleCloseCourseStudents = () => {
+        setIsStudentsModalOpen(false);
+        setStudentsCourse(null);
+        setCourseStudents([]);
+        setStudentsError(null);
     };
 
     const OverviewTab = () => (
@@ -83,7 +346,7 @@ const AdminPanel = ({user}) => {
         </div>
     );
 
-    const CoursesTab = ({allCourses, modules}) => {
+    const CoursesTab = ({allCourses}) => {
         const [currentPage, setCurrentPage] = useState(1);
         const [coursesPerPage] = useState(10);
         const [filteredCourses, setFilteredCourses] = useState([]);
@@ -100,7 +363,6 @@ const AdminPanel = ({user}) => {
         const applyFilters = () => {
             let filtered = [...allCourses];
 
-            // Filtro por búsqueda (título o instructor)
             if (filters.search) {
                 filtered = filtered.filter(course =>
                     course.title.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -108,47 +370,32 @@ const AdminPanel = ({user}) => {
                 );
             }
 
-            // Filtro por módulo
             if (filters.module_id) {
                 filtered = filtered.filter(course => course.module_id === parseInt(filters.module_id));
             }
 
-            // Filtro por nivel
             if (filters.level) {
                 filtered = filtered.filter(course => course.level === filters.level);
             }
 
             setFilteredCourses(filtered);
-            setCurrentPage(1); // Reset a primera página
+            setCurrentPage(1);
         };
 
-
         const handleFilterChange = (filterType, value) => {
-            setFilters(prev => ({
-                ...prev,
-                [filterType]: value
-            }));
+            setFilters(prev => ({...prev, [filterType]: value}));
         };
 
         const clearFilters = () => {
-            setFilters({
-                module_id: '',
-                level: '',
-                search: ''
-            });
+            setFilters({module_id: '', level: '', search: ''});
         };
 
-        // Calcular cursos para la página actual
         const indexOfLastCourse = currentPage * coursesPerPage;
         const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
         const currentCourses = filteredCourses.slice(indexOfFirstCourse, indexOfLastCourse);
-
-        // Calcular número total de páginas
         const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
 
-        const handlePageChange = (pageNumber) => {
-            setCurrentPage(pageNumber);
-        };
+        const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
         const getPaginationNumbers = () => {
             const delta = 2;
@@ -157,50 +404,35 @@ const AdminPanel = ({user}) => {
 
             for (let i = Math.max(2, currentPage - delta);
                  i <= Math.min(totalPages - 1, currentPage + delta);
-                 i++) {
-                range.push(i);
-            }
+                 i++) range.push(i);
 
-            if (currentPage - delta > 2) {
-                rangeWithDots.push(1, '...');
-            } else {
-                rangeWithDots.push(1);
-            }
+            if (currentPage - delta > 2) rangeWithDots.push(1, '...');
+            else rangeWithDots.push(1);
 
             rangeWithDots.push(...range);
 
-            if (currentPage + delta < totalPages - 1) {
-                rangeWithDots.push('...', totalPages);
-            } else {
-                rangeWithDots.push(totalPages);
-            }
+            if (currentPage + delta < totalPages - 1) rangeWithDots.push('...', totalPages);
+            else if (totalPages > 1) rangeWithDots.push(totalPages);
 
             return rangeWithDots.filter((page, index, arr) => arr.indexOf(page) === index);
         };
 
-        // Obtener módulos únicos para el filtro
         const uniqueLevels = ['beginner', 'intermediate', 'advanced'];
-
-
-
-        // Función para formatear el nivel
-        const formatLevel = (level) => {
-            const levelMap = {
-                beginner: 'Principiante',
-                intermediate: 'Intermedio',
-                advanced: 'Avanzado'
-            };
-            return levelMap[level] || level;
-        };
+        const formatLevel = (level) => ({
+            beginner: 'Principiante',
+            intermediate: 'Intermedio',
+            advanced: 'Avanzado'
+        }[level] || level);
 
         return (
             <div className="admin-courses">
                 <div className="courses-header">
                     <h3>Gestión de Cursos</h3>
-                    <button className="btn-primary">Agregar Nuevo Curso</button>
+                    <button className="btn-primary" onClick={() => setIsAddCourseModalOpen(true)}>
+                        Agregar Nuevo Curso
+                    </button>
                 </div>
 
-                {/* Filtros */}
                 <div className="courses-filters">
                     <div className="filter-group">
                         <input
@@ -220,29 +452,21 @@ const AdminPanel = ({user}) => {
                         >
                             <option value="">Todos los niveles</option>
                             {uniqueLevels.map(level => (
-                                <option key={level} value={level}>
-                                    {formatLevel(level)}
-                                </option>
+                                <option key={level} value={level}>{formatLevel(level)}</option>
                             ))}
                         </select>
                     </div>
 
-                    <button
-                        onClick={clearFilters}
-                        className="btn-secondary btn-small"
-                    >
+                    <button onClick={clearFilters} className="btn-secondary btn-small">
                         Limpiar filtros
                     </button>
                 </div>
 
-                {/* Información de resultados */}
                 <div className="courses-info">
-                <span>
-                    Mostrando {indexOfFirstCourse + 1}-{Math.min(indexOfLastCourse, filteredCourses.length)} de {filteredCourses.length} cursos
-                </span>
+                                    <span>
+                                        Mostrando {indexOfFirstCourse + 1}-{Math.min(indexOfLastCourse, filteredCourses.length)} de {filteredCourses.length} cursos
+                                    </span>
                 </div>
-
-                {/* Tabla de cursos */}
 
                 <div className="courses-table">
                     <table>
@@ -266,30 +490,37 @@ const AdminPanel = ({user}) => {
                                         <div className="course-title">
                                             <strong>{course.title}</strong>
                                             <span className="course-description">
-                                                {course.description ?
-                                                    course.description.substring(0, 50) + '...' :
-                                                    'Sin descripción'
-                                                }
-                                            </span>
+                                                                    {course.description ? course.description.substring(0, 50) + '...' : 'Sin descripción'}
+                                                                </span>
                                         </div>
                                     </td>
                                     <td>
-                                        <span className={`level-badge level-${course.level}`}>
-                                            {formatLevel(course.level)}
-                                        </span>
+                                                            <span className={`level-badge level-${course.level}`}>
+                                                                {formatLevel(course.level)}
+                                                            </span>
                                     </td>
                                     <td>{course.duration_minutes} min</td>
                                     <td>{course.instructor_name}</td>
                                     <td>
-                                        <span
-                                            className={`status-badge ${course.is_active ? 'status-active' : 'status-inactive'}`}>
-                                            {course.is_active ? 'Activo' : 'Inactivo'}
-                                        </span>
+                                                            <span
+                                                                className={`status-badge ${course.is_active ? 'status-active' : 'status-inactive'}`}>
+                                                                {course.is_active ? 'Activo' : 'Inactivo'}
+                                                            </span>
                                     </td>
                                     <td>
                                         <div className="table-actions">
-                                            <button className="btn-small btn-primary">Ver Estudiantes</button>
-                                            <button className="btn-small btn-secondary">Editar</button>
+                                            <button
+                                                className="btn-small btn-primary"
+                                                onClick={() => handleOpenCourseStudents(course)}
+                                            >
+                                                Ver Estudiantes
+                                            </button>
+                                            <button
+                                                className="btn-small btn-secondary"
+                                                onClick={() => handleOpenEditCourse(course)}
+                                            >
+                                                Editar
+                                            </button>
                                             <button className="btn-small btn-danger">Pausar</button>
                                         </div>
                                     </td>
@@ -297,16 +528,13 @@ const AdminPanel = ({user}) => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="8" className="no-results">
-                                    No se encontraron cursos
-                                </td>
+                                <td colSpan="8" className="no-results">No se encontraron cursos</td>
                             </tr>
                         )}
                         </tbody>
                     </table>
                 </div>
 
-                {/* Paginación */}
                 {totalPages > 1 && (
                     <div className="pagination">
                         <button
@@ -347,48 +575,92 @@ const AdminPanel = ({user}) => {
         );
     };
 
-    const StudentsTab = () => (
+    const StudentsTab = () => {
+        const [students, setStudents] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState(null);
+        const [statusFilter, setStatusFilter] = useState('all');
+
+        useEffect(() => {
+            const loadStudents = async () => {
+                setLoading(true);
+                setError(null);
+                try {
+                    const res = await fetch('http://localhost:3000/api/students', {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer token_temp'
+                        }
+                    });
+                    if (!res.ok) throw new Error('Error al cargar estudiantes');
+                    const data = await res.json();
+                    const list = Array.isArray(data) ? data : (data.data ?? []);
+                    setStudents(list);
+                } catch (e) {
+                    setError(e.message);
+                    setStudents([]);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            loadStudents();
+        }, []);
+
+        const filteredStudents = students.filter(s => {
+            if (statusFilter === 'active') return s.is_active !== false;
+            if (statusFilter === 'inactive') return s.is_active === false;
+            return true;
+        });
+
+        return (
         <div className="admin-students">
             <div className="students-header">
                 <h3>Estudiantes Registrados</h3>
                 <div className="students-filters">
-                    <select>
-                        <option>Todos los estudiantes</option>
-                        <option>Activos</option>
-                        <option>Inactivos</option>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="all">Todos los estudiantes</option>
+                            <option value="active">Activos</option>
+                            <option value="inactive">Inactivos</option>
                     </select>
                 </div>
             </div>
 
+                {loading && <p>Cargando estudiantes...</p>}
+                {error && <p className="error-text">Error: {error}</p>}
+
+                {!loading && !error && (
             <div className="students-grid">
-                {/* Datos simulados de estudiantes */}
-                {[
-                    {id: 1, name: 'Ana Rodriguez', email: 'ana@email.com', courses: 3, progress: 75},
-                    {id: 2, name: 'Carlos Mendez', email: 'carlos@email.com', courses: 5, progress: 92},
-                    {id: 3, name: 'Maria Lopez', email: 'maria@email.com', courses: 2, progress: 45},
-                    {id: 4, name: 'Pedro Garcia', email: 'pedro@email.com', courses: 4, progress: 68}
-                ].map(student => (
+                        {filteredStudents.length > 0 ? (
+                            filteredStudents.map(student => (
                     <div key={student.id} className="student-card">
                         <div className="student-info">
-                            <h4>{student.name}</h4>
-                            <p>{student.email}</p>
+                                        <h4>{student.name || `${student.first_name ?? ''} ${student.last_name ?? ''}`.trim() || 'Sin nombre'}</h4>
+                                        <p>{student.email || '—'}</p>
                         </div>
                         <div className="student-stats">
                             <div className="student-stat">
-                                <span className="stat-number">{student.courses}</span>
+                                            <span className="stat-number">{student.courses ?? student.courses_count ?? student.enrollments_count ?? 0}</span>
                                 <span className="stat-label">Cursos</span>
                             </div>
                             <div className="student-stat">
-                                <span className="stat-number">{student.progress}%</span>
+                                            <span className="stat-number">{(student.progress ?? student.avg_progress ?? 0)}%</span>
                                 <span className="stat-label">Progreso</span>
                             </div>
                         </div>
                         <button className="btn-small">Ver Detalles</button>
                     </div>
-                ))}
+                            ))
+                        ) : (
+                            <p className="no-results">No hay estudiantes.</p>
+                        )}
             </div>
+                )}
         </div>
     );
+    };
 
     return (
         <div className="admin-panel">
@@ -398,33 +670,59 @@ const AdminPanel = ({user}) => {
             </div>
 
             <div className="admin-tabs">
-                <button
-                    className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('overview')}
-                >
+                <button className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('overview')}>
                     Resumen
                 </button>
-                <button
-                    className={`tab-button ${activeTab === 'courses' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('courses')}
-                >
+                <button className={`tab-button ${activeTab === 'courses' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('courses')}>
                     Cursos
                 </button>
-                <button
-                    className={`tab-button ${activeTab === 'students' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('students')}
-                >
+                <button className={`tab-button ${activeTab === 'students' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('students')}>
                     Estudiantes
                 </button>
             </div>
 
             <div className="admin-content">
                 {activeTab === 'overview' && <OverviewTab/>}
-                {activeTab === 'courses' && (<CoursesTab
-                        allCourses={allCourses}
-                        modules={modules}/>)}
+                {activeTab === 'courses' && (<CoursesTab allCourses={allCourses}/>)}
                 {activeTab === 'students' && <StudentsTab/>}
             </div>
+
+            {/* Modal agregar */}
+            <AddCourseModal
+                isOpen={isAddCourseModalOpen}
+                onClose={() => setIsAddCourseModalOpen(false)}
+                onSave={handleSaveNewCourse}
+                modules={modules}
+                titleText="Agregar Nuevo Curso"
+                submitLabel="Guardar Curso"
+            />
+
+            {/* Modal editar */}
+            <AddCourseModal
+                isOpen={isEditCourseModalOpen}
+                onClose={() => {
+                    setIsEditCourseModalOpen(false);
+                    setEditingCourse(null);
+                }}
+                onSave={handleUpdateCourse}
+                modules={modules}
+                initialCourse={editingCourse}
+                titleText="Editar Curso"
+                submitLabel="Guardar Cambios"
+            />
+
+            {/* Modal ver estudiantes */}
+            <CourseStudentsModal
+                isOpen={isStudentsModalOpen}
+                onClose={handleCloseCourseStudents}
+                course={studentsCourse}
+                students={courseStudents}
+                loading={loadingStudents}
+                error={studentsError}
+            />
         </div>
     );
 };

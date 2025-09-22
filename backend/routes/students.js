@@ -26,6 +26,37 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
+// Listar estudiantes para el panel de administración
+router.get('/', async (req, res) => {
+    try {
+        const result = await query(`
+      SELECT
+        u.id,
+        u.full_name AS name,
+        u.email,
+        COUNT(up.course_id)::int AS courses,
+        COUNT(up.course_id)::int AS enrollments_count,
+        COALESCE(ROUND(AVG(up.progress_percentage))::int, 0) AS avg_progress,
+        TRUE AS is_active
+      FROM users u
+      LEFT JOIN user_progress up ON up.user_id = u.id
+      WHERE u.username <> $1
+      GROUP BY u.id, u.full_name, u.email
+      ORDER BY u.id ASC
+    `, ['admin']);
+
+        return res.json({
+            success: true,
+            data: result.rows
+        });
+    } catch (error) {
+        console.error('Error listando estudiantes:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error al obtener estudiantes'
+        });
+    }
+});
 // Obtener progreso del estudiante
 router.get('/progress', requireAuth, async (req, res) => {
     try {

@@ -251,4 +251,166 @@ router.get('/stats', async (req, res) => {
     }
 });
 
+// Editar un curso por id (actualización parcial)
+router.put('/courses/:id', async (req, res) => {
+    try {
+        const courseId = parseInt(req.params.id, 10);
+        if (Number.isNaN(courseId)) {
+            return res.status(400).json({success: false, message: 'Id de curso inválido'});
+        }
+
+        const body = req.body || {};
+        const allowedFields = [
+            'title',
+            'description',
+            'module_id',
+            'level',
+            'duration_minutes',
+            'instructor_name',
+            'video_url',
+            'badge_image',
+            'order_in_module',
+            'is_active'
+        ];
+
+        const setClauses = [];
+        const params = [];
+        let idx = 1;
+
+        for (const field of allowedFields) {
+            if (body[field] !== undefined) {
+                let value = body[field];
+
+                if (['module_id', 'duration_minutes', 'order_in_module'].includes(field)) {
+                    const parsed = parseInt(value, 10);
+                    value = Number.isNaN(parsed) ? null : parsed;
+                }
+                if (field === 'is_active') {
+                    value = Boolean(value);
+                }
+
+                setClauses.push(`${field} = $${idx++}`);
+                params.push(value);
+            }
+        }
+
+        if (setClauses.length === 0) {
+            return res.status(400).json({success: false, message: 'No hay campos para actualizar'});
+        }
+
+        const sql = `
+            UPDATE courses
+            SET ${setClauses.join(', ')},
+                updated_at = NOW()
+            WHERE id = $${idx} RETURNING id, title, description, level, duration_minutes, instructor_name,
+                      video_url, badge_image, order_in_module, module_id, is_active,
+                      created_at, updated_at
+        `;
+        params.push(courseId);
+
+        const result = await query(sql, params);
+        if (result.rowCount === 0) {
+            return res.status(404).json({success: false, message: 'Curso no encontrado'});
+        }
+
+        return res.json({
+            success: true,
+            data: result.rows[0],
+            message: 'Curso actualizado exitosamente'
+        });
+    } catch (error) {
+        console.error('Error al actualizar curso:', error);
+        return res.status(500).json({success: false, message: 'Error al actualizar el curso'});
+    }
+});
+
+// Crear curso
+router.post('/courses', async (req, res) => {
+    try {
+        const body = req.body || {};
+        const errors = {};
+
+        // Coerciones básicas
+        const title = (body.title ?? '').toString().trim();
+        const description = body.description != null ? body.description.toString().trim() : null;
+        const level = (body.level ?? 'beginner').toString().trim();
+        const module_id = Number.parseInt(body.module_id, 10);
+        const duration_minutes = Number.parseInt(body.duration_minutes ?? 60, 10);
+        const instructor_name = (body.instructor_name ?? '').toString().trim();
+        const is_active = typeof body.is_active === 'string'
+            ? body.is_active.toLowerCase() !== 'false'
+            : Boolean(body.is_active);
+
+        // Validaciones del formulario
+        if (!title) errors.title = 'El título es obligatorio';
+        else if (title.length < 3) errors.title = 'Mínimo 3 caracteres';
+
+        if (!Number.isInteger(module_id) || module_id <= 0) {
+            errors.module_id = 'module_id inválido';
+        }
+
+        const allowedLevels = new Set(['beginner', 'intermediate', 'advanced']);
+        if (!allowedLevels.has(level)) {
+            errors.level = "Nivel inválido. Use 'beginner' | 'intermediate' | 'advanced'";
+        }
+
+        if (!Number.isInteger(duration_minutes) || duration_minutes < 1) {
+            errors.duration_minutes = 'Duración debe ser un entero ≥ 1';
+        }
+
+        if (!instructor_name) errors.instructor_name = 'El instructor es obligatorio';
+
+        if (Object.keys(errors).length > 0) {
+            return res.status(422).json({success: false, message: 'Datos inválidos', errors});
+        }
+
+        // Verificar que el módulo exista
+        const {rowCount: modExists} = await query('SELECT 1 FROM modules WHERE id = $1', [module_id]);
+        if (modExists === 0) {
+            return res.status(422).json({
+                success: false,
+                message: 'Datos inválidos',
+                errors: {module_id: 'El módulo no existe'}
+            });
+        }
+
+        // Siguiente orden dentro del módulo
+        const {rows: orderRows} = await query(
+            'SELECT COALESCE(MAX(order_in_module), 0) + 1 AS next_order FROM courses WHERE module_id = $1',
+            [module_id]
+        );
+        const nextOrder = orderRows[0]?.next_order || 1;
+
+        // Insert
+        const insertSql = `
+            INSERT INTO courses
+            (title, description, module_id, level, duration_minutes, instructor_name, video_url, badge_image,
+             order_in_module, is_active)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, title, description, module_id, level, duration_minutes, instructor_name,
+                video_url, badge_image, order_in_module, is_active, created_at, updated_at
+        `;
+        const {rows} = await query(insertSql, [
+            title,
+            description,
+            module_id,
+            level,
+            duration_minutes,
+            instructor_name,
+            null,           // video_url (no lo envía el formulario)
+            null,           // badge_image (no lo envía el formulario)
+            nextOrder,
+            is_active
+        ]);
+
+        return res.status(201).json({
+            success: true,
+            data: rows[0],
+            message: 'Curso creado exitosamente'
+        });
+    } catch (err) {
+        console.error('Error creando curso:', err);
+        return res.status(500).json({success: false, message: 'Error al crear curso'});
+    }
+});
+
 module.exports = router;
