@@ -1,3 +1,11 @@
+##  ALERTA INGENIEROS
+Me dic uenta de un errro para levantar y es que no se por que en mi ide no pasa que es WebStron de JetBrains que no importa si los modulos esten mayuscula o minuscula igualmente funciona, 
+no altero el codigo por temas de que nos dieron unasa fechas, Porfavor Poner esto la primera Inicial en Mayusculas 
+<img width="247" height="302" alt="image" src="https://github.com/user-attachments/assets/f1bf5c4f-ebe5-4ebb-82f7-645c0c7d1bf1" />
+
+Esta en la Ruta de portal-capacitaciones\src\components, Disculpen por ese erro. Que pena. 
+
+
 Tambien vas a encontra un documento con el manual de usuario 
 en la carpeta de manuales
 un archivo pdf
@@ -69,6 +77,7 @@ Para facilitar las pruebas de la API, este repositorio incluye una colección de
 4. Una vez importada, podrás probar los **endpoints del portal** (login, cursos, progreso, etc.) de forma inmediata.  
 
 Esto permite validar y consumir los servicios REST sin necesidad de configurar manualmente cada petición.
+
 
 
 
