@@ -16,10 +16,10 @@ Aqui podran encontar el paso a paso para hacer los cambios necesarios
 
 2. **Configurar variables de entorno**
 
-El proyecto incluye un archivo [`/.env.example`](./.env.example) que sirve como plantilla para configurar las variables necesarias.  
+El proyecto incluye un archivo [`/.env.example`](.env) que sirve como plantilla para configurar las variables necesarias.  
 Antes de ejecutar el proyecto, debes crear un archivo `.env` en la raíz copiando y ajustando los valores según tu entorno.
    ```bash
-   cp .env.example .env
+   cp .env .env
    # Edita el archivo .env con tus valores
    ```
    ## ⚙️ Configuración de Variables de Entorno
